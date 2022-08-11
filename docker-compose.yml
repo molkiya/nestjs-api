@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  api:
+    container_name: api_dev
+    image: api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: "postgres"
+      DB_PASSWORD: 'password'
+      DB_USERNAME: 'user'
+      DB_NAME: 'db'
+      DB_PORT: 5432
+    ports:
+      - "3000:3000"
+    networks:
+      - default
+    volumes:
+      - ./api/src:/usr/app/src
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    restart: on-failure
+  postgres:
+    container_name: postgres_dev
+    image: postgres:14
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    ports:
+      - "5432:5432"
+    expose:
+      - "5432"
+    networks:
+      - default
+    volumes:
+      - postgres:/data/postgres
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: pgadmin_dev
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:5050"
+    networks:
+      - default
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    restart: unless-stopped
+
+networks:
+  default:
+
+volumes:
+  postgres:
+  pgadmin:
