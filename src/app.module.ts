@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ExtensionModule } from './api/extenshion/extension.module';
+import { ExtensionModule } from './api/extension/extension.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import {
@@ -9,8 +9,8 @@ import {
   DB_PORT,
   DB_USERNAME,
 } from './app.environments';
-import { SitesEntity } from './api/extenshion/entities/sites.entity';
-import { WhoisEntity } from './api/extenshion/entities/whois.entity';
+import { SitesEntity } from './api/extension/entities/sites.entity';
+import { WhoisEntity } from './api/extension/entities/whois.entity';
 
 @Module({
   imports: [
