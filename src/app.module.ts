@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { HostsModule } from './api/hosts/hosts.module';
+import { ExtensionModule } from './api/extenshion/extension.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import {
@@ -9,7 +9,8 @@ import {
   DB_PORT,
   DB_USERNAME,
 } from './app.environments';
-import { Host } from './api/hosts/entities/host.entity';
+import { SitesEntity } from './api/extenshion/entities/sites.entity';
+import { WhoisEntity } from './api/extenshion/entities/whois.entity';
 
 @Module({
   imports: [
@@ -20,11 +21,12 @@ import { Host } from './api/hosts/entities/host.entity';
       username: DB_USERNAME,
       password: DB_PASSWORD,
       database: DB_NAME,
-      entities: [Host],
+      entities: [SitesEntity, WhoisEntity],
       synchronize: true,
+      logging: true,
       retryDelay: 5000,
     }),
-    HostsModule,
+    ExtensionModule,
   ],
 })
 export class AppModule {}
