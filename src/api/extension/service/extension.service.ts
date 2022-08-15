@@ -45,7 +45,7 @@ export class ExtensionService {
     if (!item) {
       return { status: 'NOT EXIST' };
     } else {
-      return item.status;
+      return { status: item.status };
     }
   }
 
