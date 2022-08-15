@@ -1,7 +1,7 @@
 import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn} from 'typeorm';
 
 @Entity()
-export class SitesEntity {
+export default class SitesEntity {
   @PrimaryGeneratedColumn('increment', {
     type: 'int',
   })

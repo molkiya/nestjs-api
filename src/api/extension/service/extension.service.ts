@@ -1,8 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { SitesEntity } from '../entities/sites.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { WhoisEntity } from '../entities/whois.entity';
+import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository} from 'typeorm';
+import WhoisEntity from '../entities/whois.entity';
+import SitesEntity from '../entities/sites.entity';
 
 @Injectable()
 export class ExtensionService {
@@ -31,7 +32,7 @@ export class ExtensionService {
           ts: 'DESC',
         },
       });
-      return { site: item, whois: whois };
+      return {site: item, whois: whois};
     }
   }
 
@@ -43,20 +44,17 @@ export class ExtensionService {
     });
 
     if (!item) {
-      return { status: 'NOT EXIST' };
+      return {status: 'NOT EXIST'};
     } else {
-      return { status: item.status };
+      return {status: item.status};
     }
   }
 
   async createSiteAndGetDataInDB(name: string) {
-    let request = { data: { test: name } };
+    let request = {data: {test: name}};
 
     if (!request.data) {
-      throw new HttpException(
-        'Whois server not working',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Whois server not working', HttpStatus.BAD_REQUEST);
     }
 
     let site = await this.sitesRepository
@@ -82,6 +80,6 @@ export class ExtensionService {
       .returning('*')
       .execute();
 
-    return { site: site.generatedMaps[0], whois: el.generatedMaps[0] };
+    return {site: site.generatedMaps[0], whois: el.generatedMaps[0]};
   }
 }

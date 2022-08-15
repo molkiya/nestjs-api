@@ -1,17 +1,9 @@
-import { Module } from '@nestjs/common';
-import { ExtensionModule } from './api/extension/extension.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import {Module} from '@nestjs/common';
+import {ExtensionModule} from './api/extension/extension.module';
+import {TypeOrmModule} from '@nestjs/typeorm';
 
-import {
-  DB_DEV,
-  DB_HOST,
-  DB_NAME,
-  DB_PASSWORD,
-  DB_PORT,
-  DB_USERNAME,
-} from './app.environments';
-import { SitesEntity } from './api/extension/entities/sites.entity';
-import { WhoisEntity } from './api/extension/entities/whois.entity';
+import {DB_DEV, DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USERNAME} from './app.environments';
+import Entities from './api/extension/entities/entities';
 
 @Module({
   imports: [
@@ -22,7 +14,7 @@ import { WhoisEntity } from './api/extension/entities/whois.entity';
       username: DB_USERNAME,
       password: DB_PASSWORD,
       database: DB_NAME,
-      entities: [SitesEntity, WhoisEntity],
+      entities: Entities,
       synchronize: DB_DEV,
       logging: DB_DEV,
       retryDelay: 5000,

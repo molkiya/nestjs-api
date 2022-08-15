@@ -1,12 +1,10 @@
-import { Module } from '@nestjs/common';
-import { ExtensionService } from './service/extension.service';
-import { ExtensionController } from './controller/extension.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { SitesEntity } from './entities/sites.entity';
-import { WhoisEntity } from './entities/whois.entity';
-
+import {Module} from '@nestjs/common';
+import {ExtensionService} from './service/extension.service';
+import {ExtensionController} from './controller/extension.controller';
+import {TypeOrmModule} from '@nestjs/typeorm';
+import Entities from './entities/entities';
 @Module({
-  imports: [TypeOrmModule.forFeature([SitesEntity, WhoisEntity])],
+  imports: [TypeOrmModule.forFeature(Entities)],
   controllers: [ExtensionController],
   providers: [ExtensionService],
 })
