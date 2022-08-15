@@ -1,5 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { WhoisEntity } from './whois.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class SitesEntity {
@@ -16,10 +15,9 @@ export class SitesEntity {
 
   @Column({
     type: 'int',
-    nullable: true,
-    // nullable: false,
+    nullable: false,
   })
-  created_by: string;
+  created_by: number;
 
   @Column({
     nullable: false,
@@ -28,6 +26,9 @@ export class SitesEntity {
   })
   created_at: Date;
 
-  @OneToMany(() => WhoisEntity, (whoisEntity) => whoisEntity.site)
-  whois: WhoisEntity[];
+  @Column({
+    nullable: false,
+    type: 'text',
+  })
+  status: string;
 }

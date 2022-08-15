@@ -8,53 +8,77 @@ import { WhoisEntity } from '../entities/whois.entity';
 export class ExtensionService {
   constructor(
     @InjectRepository(SitesEntity)
-    private extensionRepository: Repository<SitesEntity>,
+    private sitesRepository: Repository<SitesEntity>,
     @InjectRepository(WhoisEntity)
     private whoisRepository: Repository<WhoisEntity>,
   ) {}
 
   async getSiteInfo(name: string) {
-    let item = await this.extensionRepository.findOne({
+    let item = await this.sitesRepository.findOne({
       where: {
         fqdn: name,
       },
-      relations: ['whois'],
     });
 
     if (!item) {
-      return await this.createSiteInDB(name);
+      return await this.createSiteAndGetDataInDB(name);
     } else {
-      return item.whois[0];
+      let whois = await this.whoisRepository.findOne({
+        where: {
+          site_id: item.id,
+        },
+        order: {
+          ts: 'DESC',
+        },
+      });
+      return { site: item, whois: whois };
     }
   }
 
-  async createSiteInDB(name: string) {
-    let site = await this.extensionRepository
-      .createQueryBuilder()
-      .insert()
-      .into(SitesEntity)
-      .values([{ fqdn: name }])
-      .returning('*')
-      .execute();
+  async getSiteStatus(name: string) {
+    let item = await this.sitesRepository.findOne({
+      where: {
+        fqdn: name,
+      },
+    });
 
-    return await this.getDataFromWhois(site.generatedMaps[0].id, name);
+    if (!item) {
+      return { status: 'NOT EXIST' };
+    } else {
+      return item.status;
+    }
   }
 
-  async getDataFromWhois(id: number, name: string) {
+  async createSiteAndGetDataInDB(name: string) {
     let request = { data: { test: name } };
 
     if (!request.data) {
       throw new HttpException('Whois server not working', HttpStatus.NOT_FOUND);
     }
 
+    let site = await this.sitesRepository
+      .createQueryBuilder()
+      .insert()
+      .into(SitesEntity)
+      .values({
+        fqdn: name,
+        created_by: 1,
+        status: 'NEW',
+      })
+      .returning('*')
+      .execute();
+
     let el = await this.whoisRepository
       .createQueryBuilder()
       .insert()
       .into(WhoisEntity)
-      .values([{ raw: request.data, site_id: id }])
+      .values({
+        raw: request.data,
+        site_id: site.generatedMaps[0].id,
+      })
       .returning('*')
       .execute();
 
-    return el.generatedMaps[0];
+    return { site: site.generatedMaps[0], whois: el.generatedMaps[0] };
   }
 }

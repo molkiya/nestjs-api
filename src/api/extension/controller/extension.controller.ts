@@ -21,4 +21,15 @@ export class ExtensionController {
     }
     return this.extensionService.getSiteInfo(url);
   }
+
+  @Get(':url/status')
+  getSiteStatus(@Param('url') url: string) {
+    if (new URL(`https://${url}`).hostname !== url || url.length > 253) {
+      throw new HttpException(
+        'No/invalid hostname send',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.extensionService.getSiteStatus(url);
+  }
 }

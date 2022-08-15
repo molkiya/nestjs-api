@@ -1,18 +1,14 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import { SitesEntity } from './sites.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class WhoisEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @Column()
+  @Column({
+    type: 'int',
+    nullable: false,
+  })
   site_id: number;
 
   @Column({
@@ -24,11 +20,7 @@ export class WhoisEntity {
 
   @Column({
     type: 'bytea',
-    nullable: true,
+    nullable: false,
   })
   raw: Buffer;
-
-  @ManyToOne(() => SitesEntity, (site) => site.whois)
-  @JoinColumn({ name: 'site_id' })
-  site: SitesEntity;
 }
