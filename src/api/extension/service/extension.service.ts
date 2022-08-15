@@ -53,7 +53,10 @@ export class ExtensionService {
     let request = { data: { test: name } };
 
     if (!request.data) {
-      throw new HttpException('Whois server not working', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        'Whois server not working',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     let site = await this.sitesRepository

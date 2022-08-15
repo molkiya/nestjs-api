@@ -3,6 +3,7 @@ import { ExtensionModule } from './api/extension/extension.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import {
+  DB_DEV,
   DB_HOST,
   DB_NAME,
   DB_PASSWORD,
@@ -22,8 +23,8 @@ import { WhoisEntity } from './api/extension/entities/whois.entity';
       password: DB_PASSWORD,
       database: DB_NAME,
       entities: [SitesEntity, WhoisEntity],
-      synchronize: true,
-      logging: true,
+      synchronize: DB_DEV,
+      logging: DB_DEV,
       retryDelay: 5000,
     }),
     ExtensionModule,
