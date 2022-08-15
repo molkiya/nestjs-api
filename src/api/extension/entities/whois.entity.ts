@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn} from 'typeorm';
 
 @Entity()
 export class WhoisEntity {
@@ -11,11 +11,7 @@ export class WhoisEntity {
   })
   site_id: number;
 
-  @Column({
-    nullable: false,
-    type: 'timestamptz',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
+  @CreateDateColumn({type: 'timestamp', nullable: false})
   ts: string;
 
   @Column({

@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {Column, CreateDateColumn, Entity, PrimaryGeneratedColumn} from 'typeorm';
 
 @Entity()
 export class SitesEntity {
@@ -19,11 +19,7 @@ export class SitesEntity {
   })
   created_by: number;
 
-  @Column({
-    nullable: false,
-    type: 'timestamptz',
-    default: () => 'CURRENT_TIMESTAMP',
-  })
+  @CreateDateColumn({type: 'timestamp', nullable: false})
   created_at: Date;
 
   @Column({
