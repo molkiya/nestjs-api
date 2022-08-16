@@ -6,7 +6,7 @@ export const DB_PORT = Number(process.env.DB_PORT) || 5432;
 export const DB_USERNAME = process.env.DB_USERNAME || 'user';
 export const DB_PASSWORD = process.env.DB_PASSWORD || 'password';
 export const DB_NAME = process.env.DB_NAME || 'db';
-export const DB_DEV = process.env.DB_DEV.toLowerCase() == 'true';
+export const DB_DEV = JSON.parse(process.env.DB_DEV);
 
 export const CLIENT_ID = process.env.CLIENT_ID;
 export const CLIENT_SECRET = process.env.CLIENT_SECRET;
