@@ -1,23 +1,23 @@
-import {Controller, Get, HttpException, HttpStatus, Param} from '@nestjs/common';
+import {Controller, Get, HttpException, Param} from '@nestjs/common';
 import {ExtensionService} from '../service/extension.service';
 
-@Controller('extension')
+@Controller('ext')
 export class ExtensionController {
   constructor(private readonly extensionService: ExtensionService) {}
 
   @Get(':url')
-  getSiteInfo(@Param('url') url: string) {
+  async getSiteInfo(@Param('url') url: string) {
     if (new URL(`https://${url}`).hostname !== url || url.length > 253) {
-      throw new HttpException('No/invalid hostname send', HttpStatus.BAD_REQUEST);
+      throw new HttpException('No/invalid hostname send', 400);
     }
-    return this.extensionService.getSiteInfo(url);
+    return await this.extensionService.getSiteInfo(url);
   }
 
   @Get(':url/status')
-  getSiteStatus(@Param('url') url: string) {
+  async getSiteStatus(@Param('url') url: string) {
     if (new URL(`https://${url}`).hostname !== url || url.length > 253) {
-      throw new HttpException('No/invalid hostname send', HttpStatus.BAD_REQUEST);
+      throw new HttpException('No/invalid hostname send', 400);
     }
-    return this.extensionService.getSiteStatus(url);
+    return await this.extensionService.getSiteStatus(url);
   }
 }

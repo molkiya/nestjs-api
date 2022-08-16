@@ -1,5 +1,6 @@
 import {OAuth2Client} from 'google-auth-library';
 import {CLIENT_ID, CLIENT_SECRET, REDIRECT_URL} from '../../app.environments';
+import {HttpException} from '@nestjs/common';
 
 let oAuth2Client: OAuth2Client | null = null;
 
@@ -9,6 +10,7 @@ export function initOauth() {
 
 export function getOauthClient() {
   if (oAuth2Client == null) {
+    throw new HttpException('OAuth google failed', 400);
   } else {
     return oAuth2Client;
   }

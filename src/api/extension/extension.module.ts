@@ -5,9 +5,10 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import Entities from './entities/entities';
 
 import {CheckOauthMiddleware} from './middlewares/checkOauth.middleware';
+import {RedisModule} from '../../redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature(Entities)],
+  imports: [TypeOrmModule.forFeature(Entities), RedisModule],
   controllers: [ExtensionController],
   providers: [ExtensionService],
 })

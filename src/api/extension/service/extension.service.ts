@@ -1,9 +1,11 @@
-import {HttpException, HttpStatus, Injectable} from '@nestjs/common';
+import {HttpException, HttpStatus, Inject, Injectable} from '@nestjs/common';
 
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
+
 import WhoisEntity from '../entities/whois.entity';
 import SitesEntity from '../entities/sites.entity';
+import Redis from 'ioredis';
 
 @Injectable()
 export class ExtensionService {
@@ -12,10 +14,12 @@ export class ExtensionService {
     private sitesRepository: Repository<SitesEntity>,
     @InjectRepository(WhoisEntity)
     private whoisRepository: Repository<WhoisEntity>,
+    @Inject('REDIS_CLIENT')
+    private readonly redis: Redis,
   ) {}
 
   async getSiteInfo(name: string) {
-    let item = await this.sitesRepository.findOne({
+    const item = await this.sitesRepository.findOne({
       where: {
         fqdn: name,
       },
@@ -24,7 +28,7 @@ export class ExtensionService {
     if (!item) {
       return await this.createSiteAndGetDataInDB(name);
     } else {
-      let whois = await this.whoisRepository.findOne({
+      const whois = await this.whoisRepository.findOne({
         where: {
           site_id: item.id,
         },
@@ -37,7 +41,7 @@ export class ExtensionService {
   }
 
   async getSiteStatus(name: string) {
-    let item = await this.sitesRepository.findOne({
+    const item = await this.sitesRepository.findOne({
       where: {
         fqdn: name,
       },
@@ -46,18 +50,22 @@ export class ExtensionService {
     if (!item) {
       return {status: 'NOT EXIST'};
     } else {
+      await this.redis.expireat(name, Number(+new Date() / 1000) + 86400, (err, result) => {
+        if (err) throw err;
+        console.log(result);
+      });
       return {status: item.status};
     }
   }
 
   async createSiteAndGetDataInDB(name: string) {
-    let request = {data: {test: name}};
+    const request = {data: {test: name}};
 
     if (!request.data) {
       throw new HttpException('Whois server not working', HttpStatus.BAD_REQUEST);
     }
 
-    let site = await this.sitesRepository
+    const site = await this.sitesRepository
       .createQueryBuilder()
       .insert()
       .into(SitesEntity)
@@ -69,7 +77,7 @@ export class ExtensionService {
       .returning('*')
       .execute();
 
-    let el = await this.whoisRepository
+    const el = await this.whoisRepository
       .createQueryBuilder()
       .insert()
       .into(WhoisEntity)
