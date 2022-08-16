@@ -28,6 +28,7 @@
     "@nestjs/mapped-types": "1.1.0",
     "@nestjs/platform-express": "9.0.9",
     "@nestjs/typeorm": "9.0.1",
+    "google-auth-library": "8.1.1",
     "mysql2": "2.3.3",
     "pg": "8.7.3",
     "reflect-metadata": "0.1.13",
