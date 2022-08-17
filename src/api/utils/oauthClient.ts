@@ -1,5 +1,5 @@
 import {OAuth2Client} from 'google-auth-library';
-import {CLIENT_ID, CLIENT_SECRET, REDIRECT_URL} from '../../app.environments';
+import {CLIENT_ID, CLIENT_SECRET, REDIRECT_URL} from '../../config/app/app.config';
 import {HttpException} from '@nestjs/common';
 
 let oAuth2Client: OAuth2Client | null = null;

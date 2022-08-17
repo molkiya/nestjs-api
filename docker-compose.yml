@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      DB_HOST: "postgres"
+      DB_HOST: "database"
       DB_PASSWORD: 'password'
       DB_USERNAME: 'user'
       DB_NAME: 'db'
@@ -42,7 +42,7 @@ services:
     networks:
       - default
     volumes:
-      - postgres:/data/postgres
+      - database:/data/database
     restart: unless-stopped
   pgadmin:
     container_name: pgadmin_dev

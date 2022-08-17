@@ -1,6 +1,6 @@
 import {Module} from '@nestjs/common';
 import {createClient} from '@redis/client';
-import {REDIS_HOST, REDIS_PASSWORD, REDIS_PORT} from './app.environments';
+import {REDIS_HOST, REDIS_PASSWORD, REDIS_PORT} from '../app/app.config';
 
 @Module({
   providers: [

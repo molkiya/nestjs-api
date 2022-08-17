@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-export const DB_HOST: string = process.env.DB_HOST || 'postgres';
+export const DB_HOST: string = process.env.DB_HOST || 'databases';
 export const DB_PORT: number = Number(process.env.DB_PORT) || 5432;
 export const DB_USERNAME: string = process.env.DB_USERNAME || 'user';
 export const DB_PASSWORD: string = process.env.DB_PASSWORD || 'password';

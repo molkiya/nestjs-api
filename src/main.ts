@@ -1,7 +1,7 @@
 import {NestFactory} from '@nestjs/core';
 import {AppModule} from './app.module';
 import {initOauth} from './api/utils/oauthClient';
-import {APP_PORT} from './app.environments';
+import {APP_PORT} from './config/app/app.config';
 import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 

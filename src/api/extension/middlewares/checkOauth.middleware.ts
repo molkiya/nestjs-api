@@ -16,7 +16,9 @@ export class CheckOauthMiddleware implements NestMiddleware {
       throw new HttpException('Bad Request', 400);
     }
     const oauthToken: string = oauthBearerToken.substring(7, oauthBearerToken.length);
+
     const redisResult = await this.redis.get(oauthToken);
+
     if (redisResult) {
       next();
     } else {

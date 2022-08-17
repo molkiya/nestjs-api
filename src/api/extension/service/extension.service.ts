@@ -1,11 +1,12 @@
-import {HttpException, HttpStatus, Inject, Injectable} from '@nestjs/common';
+import {HttpException, Inject, Injectable} from '@nestjs/common';
 
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
-
-import WhoisEntity from '../entities/whois.entity';
-import SitesEntity from '../entities/sites.entity';
 import Redis from 'ioredis';
+
+import WhoisEntity from '../entities/entities/whois.entity';
+import SitesEntity from '../entities/entities/sites.entity';
+import {SECONDS_HOUR} from '../../utils/enum.utils';
 
 @Injectable()
 export class ExtensionService {
@@ -18,47 +19,41 @@ export class ExtensionService {
     private readonly redis: Redis,
   ) {}
 
-  async getSiteInfo(name: string) {
-    const item = await this.sitesRepository.findOne({
-      where: {
-        fqdn: name,
-      },
-    });
-
-    if (!item) {
-      return await this.createSiteAndGetDataInDB(name);
+  public async getSiteStatus(name: string) {
+    const cachedSite = await this.redis.get(name);
+    if (cachedSite) {
+      return cachedSite;
     } else {
-      const whois = await this.whoisRepository.findOne({
+      const item = await this.sitesRepository.findOne({
         where: {
-          site_id: item.id,
-        },
-        order: {
-          ts: 'DESC',
+          fqdn: name,
         },
       });
-      return {site: item, whois: whois};
+
+      if (!item) {
+        const result = await this.createSiteAndGetDataInDB(name);
+        const value = Buffer.from(JSON.stringify(result));
+        await this.redis.set(name, value, 'EX', Number(SECONDS_HOUR));
+        return result;
+      } else {
+        const whois = await this.whoisRepository.findOne({
+          where: {
+            site_id: item.id,
+          },
+          order: {
+            ts: 'DESC',
+          },
+        });
+        return {site: item, whois: whois};
+      }
     }
   }
 
-  async getSiteStatus(name: string) {
-    const item = await this.sitesRepository.findOne({
-      where: {
-        fqdn: name,
-      },
-    });
-
-    if (!item) {
-      return {status: 'NOT EXIST'};
-    } else {
-      return {status: item.status};
-    }
-  }
-
-  async createSiteAndGetDataInDB(name: string) {
+  private async createSiteAndGetDataInDB(name: string) {
     const request = {data: {test: name}};
 
     if (!request.data) {
-      throw new HttpException('Whois server not working', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Whois server not working', 500);
     }
 
     const site = await this.sitesRepository
@@ -73,7 +68,7 @@ export class ExtensionService {
       .returning('*')
       .execute();
 
-    const el = await this.whoisRepository
+    const whois = await this.whoisRepository
       .createQueryBuilder()
       .insert()
       .into(WhoisEntity)
@@ -84,6 +79,9 @@ export class ExtensionService {
       .returning('*')
       .execute();
 
-    return {site: site.generatedMaps[0], whois: el.generatedMaps[0]};
+    return {
+      site: site.generatedMaps[0],
+      whois: whois.generatedMaps[0],
+    };
   }
 }

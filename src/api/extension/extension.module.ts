@@ -5,7 +5,7 @@ import {TypeOrmModule} from '@nestjs/typeorm';
 import Entities from './entities/entities';
 
 import {CheckOauthMiddleware} from './middlewares/checkOauth.middleware';
-import {RedisModule} from '../../redis.module';
+import {RedisModule} from '../../config/redis/redis.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature(Entities), RedisModule],
