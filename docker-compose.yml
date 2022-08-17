@@ -8,11 +8,14 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      DB_HOST: "postgres"
+      DB_HOST: "database"
       DB_PASSWORD: 'password'
       DB_USERNAME: 'user'
       DB_NAME: 'db'
       DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
     ports:
       - "3000:3000"
     networks:
@@ -21,6 +24,7 @@ services:
       - ./api/src:/usr/app/src
     depends_on:
       - postgres
+      - redis
     links:
       - postgres
     restart: on-failure
@@ -38,9 +42,8 @@ services:
     networks:
       - default
     volumes:
-      - postgres:/data/postgres
+      - database:/data/database
     restart: unless-stopped
-
   pgadmin:
     container_name: pgadmin_dev
     image: dpage/pgadmin4
@@ -55,10 +58,20 @@ services:
     volumes:
       - pgadmin:/var/lib/pgadmin
     restart: unless-stopped
-
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --seYVX7EwVmmxKPCDmwMtyKVge8oLd2t81ave 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - redis:/data
+    networks:
+      - default
 networks:
   default:
 
 volumes:
   postgres:
   pgadmin:
+  redis:

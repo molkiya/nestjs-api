@@ -1,4 +1,6 @@
-import SitesEntity from './sites.entity';
-import WhoisEntity from './whois.entity';
+import SitesEntity from './entities/sites.entity';
+import WhoisEntity from './entities/whois.entity';
+
 const Entities = [SitesEntity, WhoisEntity];
+
 export default Entities;

@@ -1,10 +1,13 @@
 {
   "name": "api_tom_dev",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "tomdev 2.0",
+  "author": "const-dev",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": "16.16"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
@@ -26,8 +29,15 @@
     "@nestjs/config": "2.2.0",
     "@nestjs/core": "9.0.9",
     "@nestjs/mapped-types": "1.1.0",
+    "@nestjs/microservices": "9.0.11",
     "@nestjs/platform-express": "9.0.9",
+    "@nestjs/swagger": "6.0.5",
     "@nestjs/typeorm": "9.0.1",
+    "@redis/client": "1.2.0",
+    "body-parser": "1.20.0",
+    "cache-manager": "4.1.0",
+    "google-auth-library": "8.1.1",
+    "ioredis": "5.2.2",
     "mysql2": "2.3.3",
     "pg": "8.7.3",
     "reflect-metadata": "0.1.13",
