@@ -50,10 +50,6 @@ export class ExtensionService {
     if (!item) {
       return {status: 'NOT EXIST'};
     } else {
-      await this.redis.expireat(name, Number(+new Date() / 1000) + 86400, (err, result) => {
-        if (err) throw err;
-        console.log(result);
-      });
       return {status: item.status};
     }
   }
