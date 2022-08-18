@@ -20,7 +20,7 @@ export class CheckOauthMiddleware implements NestMiddleware {
 
     const redisResult = await this.redis.get(oauthToken);
 
-    console.log('token', redisResult);
+    console.log('token', {oauthToken, redisResult});
 
     if (redisResult) {
       next();
