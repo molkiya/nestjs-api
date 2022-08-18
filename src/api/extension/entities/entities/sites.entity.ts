@@ -19,7 +19,10 @@ export default class SitesEntity {
   })
   created_by: number;
 
-  @CreateDateColumn({type: 'timestamp', nullable: false})
+  @CreateDateColumn({
+    type: 'timestamp',
+    nullable: false,
+  })
   created_at: Date;
 
   @Column({

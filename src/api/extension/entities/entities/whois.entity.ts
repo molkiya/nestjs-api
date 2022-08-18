@@ -11,7 +11,10 @@ export default class WhoisEntity {
   })
   site_id: number;
 
-  @CreateDateColumn({type: 'timestamp', nullable: false})
+  @CreateDateColumn({
+    type: 'timestamp',
+    nullable: false,
+  })
   ts: string;
 
   @Column({

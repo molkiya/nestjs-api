@@ -22,36 +22,45 @@ export class ExtensionService {
   public async getSiteStatus(name: string) {
     const cachedSite = await this.redis.get(name);
     console.log('cachedSite', cachedSite);
+
     if (cachedSite) {
       return cachedSite;
-    } else {
-      const item = await this.sitesRepository.findOne({
+    }
+
+    const item = await this.sitesRepository.findOne({
+      where: {
+        fqdn: name,
+      },
+    });
+
+    if (item) {
+      const whois = await this.whoisRepository.findOne({
         where: {
-          fqdn: name,
+          site_id: item.id,
+        },
+        order: {
+          ts: 'DESC',
         },
       });
-
-      if (!item) {
-        const result = await this.createSiteAndGetDataInDB(name);
-        const value = Buffer.from(JSON.stringify(result));
-        await this.redis.set(name, value, 'EX', Number(SECONDS_HOUR));
-        return result;
-      } else {
-        const whois = await this.whoisRepository.findOne({
-          where: {
-            site_id: item.id,
-          },
-          order: {
-            ts: 'DESC',
-          },
-        });
-        return {site: item, whois: whois};
-      }
+      return {
+        site: item,
+        whois: whois,
+      };
     }
+
+    const result = await this.createSiteAndGetDataInDB(name);
+    const value = Buffer.from(JSON.stringify(result));
+
+    await this.redis.set(name, value, 'EX', Number(SECONDS_HOUR));
+    return result;
   }
 
   private async createSiteAndGetDataInDB(name: string) {
-    const request = {data: {test: name}};
+    const request = {
+      data: {
+        test: name,
+      },
+    };
 
     if (!request.data) {
       throw new HttpException('Whois server not working', 500);
