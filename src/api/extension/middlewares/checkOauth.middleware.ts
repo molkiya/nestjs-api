@@ -19,12 +19,15 @@ export class CheckOauthMiddleware implements NestMiddleware {
 
     const redisResult = await this.redis.get(oauthToken);
 
+    console.log('token', redisResult);
+
     if (redisResult) {
       next();
     } else {
       let newOauthToken;
       try {
         newOauthToken = await getOauthClient().getTokenInfo(oauthToken);
+        console.log('newOauthToken', newOauthToken);
       } catch (e) {
         throw new HttpException('Bad Request', 400);
       }
