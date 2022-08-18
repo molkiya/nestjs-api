@@ -1,33 +1,33 @@
 version: "3.9"
 
 services:
-  api:
-    container_name: api_dev
-    image: api:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      DB_HOST: "database"
-      DB_PASSWORD: 'password'
-      DB_USERNAME: 'user'
-      DB_NAME: 'db'
-      DB_PORT: 5432
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
-    ports:
-      - "3000:3000"
-    networks:
-      - default
-    volumes:
-      - ./api/src:/usr/app/src
-    depends_on:
-      - postgres
-      - redis
-    links:
-      - postgres
-    restart: on-failure
+  #  api:
+  #    container_name: api_dev
+  #    image: api:latest
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile
+  #    environment:
+  #      DB_HOST: "database"
+  #      DB_PASSWORD: 'password'
+  #      DB_USERNAME: 'user'
+  #      DB_NAME: 'db'
+  #      DB_PORT: 5432
+  #      REDIS_HOST: redis
+  #      REDIS_PORT: 6379
+  #      REDIS_PASSWORD: eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+  #    ports:
+  #      - "3000:3000"
+  #    networks:
+  #      - default
+  #    volumes:
+  #      - ./api/src:/usr/app/src
+  #    depends_on:
+  #      - postgres
+  #      - redis
+  #    links:
+  #      - postgres
+  #    restart: on-failure
   postgres:
     container_name: postgres_dev
     image: postgres:14
@@ -42,28 +42,28 @@ services:
     networks:
       - default
     volumes:
-      - database:/data/database
+      - postgres:/data/database
     restart: unless-stopped
-  pgadmin:
-    container_name: pgadmin_dev
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
-      PGADMIN_DEFAULT_PASSWORD: admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    ports:
-      - "5050:5050"
-    networks:
-      - default
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-    restart: unless-stopped
+  #  pgadmin:
+  #    container_name: pgadmin_dev
+  #    image: dpage/pgadmin4
+  #    environment:
+  #      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+  #      PGADMIN_DEFAULT_PASSWORD: admin
+  #      PGADMIN_CONFIG_SERVER_MODE: 'False'
+  #    ports:
+  #      - "5050:5050"
+  #    networks:
+  #      - default
+  #    volumes:
+  #      - pgadmin:/var/lib/pgadmin
+  #    restart: unless-stopped
   redis:
     image: redis:6.2-alpine
     restart: always
     ports:
       - '6379:6379'
-    command: redis-server --seYVX7EwVmmxKPCDmwMtyKVge8oLd2t81ave 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
     volumes:
       - redis:/data
     networks:
@@ -73,5 +73,5 @@ networks:
 
 volumes:
   postgres:
-  pgadmin:
+  #  pgadmin:
   redis:
