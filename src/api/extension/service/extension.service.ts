@@ -21,6 +21,7 @@ export class ExtensionService {
 
   public async getSiteStatus(name: string) {
     const cachedSite = await this.redis.get(name);
+    console.log('cachedSite', cachedSite);
     if (cachedSite) {
       return cachedSite;
     } else {
