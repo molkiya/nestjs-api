@@ -33,8 +33,7 @@ export class CheckOauthMiddleware implements NestMiddleware {
         newOauthToken.email.endsWith('@publishers-clickadilla.com' || '@onlinesup.com')
       ) {
         const time = this.seconds_since_epoch(newOauthToken.expiry_date) - this.seconds_since_epoch(Date.now());
-        const value = Buffer.from(JSON.stringify(newOauthToken));
-        await this.redis.set(oauthToken.toString(), value, 'EX', Number(time));
+        await this.redis.expireat(oauthToken.toString(), time);
         next();
       } else {
         throw new HttpException('Bad Request', 400);
