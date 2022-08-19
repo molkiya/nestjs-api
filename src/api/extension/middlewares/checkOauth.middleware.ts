@@ -30,7 +30,7 @@ export class CheckOauthMiddleware implements NestMiddleware {
         newOauthToken = await getOauthClient().getTokenInfo(oauthToken);
         console.log('newOauthToken', newOauthToken);
       } catch (e) {
-        throw new HttpException('Bad Request', 400);
+        throw new HttpException('Unauthorized', 401);
       }
 
       if (
@@ -40,14 +40,13 @@ export class CheckOauthMiddleware implements NestMiddleware {
             return true;
           }
         })
-        // newOauthToken.email.endsWith('@publishers-clickadilla.com' || '@onlinesup.com')
       ) {
         const time = this.seconds_since_epoch(newOauthToken.expiry_date) - this.seconds_since_epoch(Date.now());
         await this.redis.expire(oauthToken.toString(), time);
         next();
       } else {
         console.log('DOMAIN');
-        throw new HttpException('Bad Request', 400);
+        throw new HttpException('Unauthorized', 401);
       }
     }
   }
@@ -59,7 +58,7 @@ export class CheckOauthMiddleware implements NestMiddleware {
   private oauth_token(req): string {
     const oauthBearerToken = String(req.headers['authorization'] || '');
     if (!oauthBearerToken || !oauthBearerToken.startsWith('Bearer ')) {
-      throw new HttpException('Bad Request', 400);
+      throw new HttpException('Unauthorized', 401);
     }
     console.log('token', oauthBearerToken);
     return oauthBearerToken.substring(7, oauthBearerToken.length);
