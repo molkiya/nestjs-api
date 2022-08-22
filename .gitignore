@@ -13,6 +13,7 @@ lerna-debug.log*
 
 credentials.json
 .env
+docker-compose.dev.yml
 
 # OS
 .DS_Store

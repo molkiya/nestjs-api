@@ -2,7 +2,7 @@ import {HttpException, Inject, Injectable, NestMiddleware} from '@nestjs/common'
 import {NextFunction, Request, Response} from 'express';
 import Redis from 'ioredis';
 import {getOauthClient} from '../../utils/oauthClient.utils';
-import {DOMAIN_LIST} from '../../utils/emailDomen.utils';
+import {DOMAIN_LIST} from '../../utils/email.utils';
 
 @Injectable()
 export class CheckOauthMiddleware implements NestMiddleware {
