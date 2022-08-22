@@ -30,4 +30,10 @@ export default class SitesEntity {
     type: 'text',
   })
   status: string;
+
+  @Column({
+    nullable: false,
+    type: 'text',
+  })
+  title: string;
 }

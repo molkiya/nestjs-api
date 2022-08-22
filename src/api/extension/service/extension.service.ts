@@ -6,7 +6,8 @@ import Redis from 'ioredis';
 
 import WhoisEntity from '../entities/entities/whois.entity';
 import SitesEntity from '../entities/entities/sites.entity';
-import {SECONDS_HOUR} from '../../utils/enum.utils';
+import {GREEN} from '../../utils/icons.utils';
+import {SECONDS_HOUR_MILLISEC} from '../../utils/enum.utils';
 
 @Injectable()
 export class ExtensionService {
@@ -20,13 +21,6 @@ export class ExtensionService {
   ) {}
 
   public async getSiteStatus(name: string) {
-    const cachedSite = await this.redis.get(name);
-    console.log('cachedSite', cachedSite);
-
-    if (cachedSite) {
-      return cachedSite;
-    }
-
     const item = await this.sitesRepository.findOne({
       where: {
         fqdn: name,
@@ -42,20 +36,31 @@ export class ExtensionService {
           ts: 'DESC',
         },
       });
+      this.updateSite(
+        {
+          site: item,
+          whois: whois,
+        },
+        SECONDS_HOUR_MILLISEC,
+        `./icons/${GREEN}.png`,
+      );
       return {
         site: item,
         whois: whois,
       };
     }
 
-    const result = await this.createSiteAndGetDataInDB(name);
-    const value = Buffer.from(JSON.stringify(result));
-
-    await this.redis.set(name, value, 'EX', Number(SECONDS_HOUR));
-    return result;
+    const site = await this.createSite(name);
+    return this.updateSite(site, SECONDS_HOUR_MILLISEC, `./icons/${GREEN}.png`);
   }
 
-  private async createSiteAndGetDataInDB(name: string) {
+  private updateSite(site: any, ttl: number, path: string) {
+    site.site['ttl'] = ttl;
+    site.site.path = path;
+    return site;
+  }
+
+  private async createSite(name: string) {
     const request = {
       data: {
         test: name,
@@ -74,6 +79,7 @@ export class ExtensionService {
         fqdn: name,
         created_by: 1,
         status: 'NEW',
+        title: 'Ready for work',
       })
       .returning('*')
       .execute();
