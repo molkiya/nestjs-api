@@ -36,10 +36,8 @@ export class CheckOauthMiddleware implements NestMiddleware {
       if (
         newOauthToken.email_verified &&
         DOMAIN_LIST.map((DOMAIN: string) => {
-          if (newOauthToken.email === DOMAIN) {
-            return true;
-          }
-        })
+          return newOauthToken.email.endsWith(DOMAIN);
+        }).includes(true)
       ) {
         const time = this.seconds_since_epoch(newOauthToken.expiry_date) - this.seconds_since_epoch(Date.now());
         await this.redis.expire(oauthToken.toString(), time);
