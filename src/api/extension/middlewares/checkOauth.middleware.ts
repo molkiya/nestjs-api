@@ -42,6 +42,8 @@ export class CheckOauthMiddleware implements NestMiddleware {
         })
       ) {
         const time = this.seconds_since_epoch(newOauthToken.expiry_date) - this.seconds_since_epoch(Date.now());
+        const value = Buffer.from(JSON.stringify(newOauthToken));
+        await this.redis.set(oauthToken.toString(), value);
         await this.redis.expire(oauthToken.toString(), time);
         next();
       } else {
