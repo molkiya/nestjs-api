@@ -4,7 +4,7 @@ import {ExtensionController} from './controller/extension.controller';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import Entities from './entities/entities';
 
-import {CheckOauthMiddleware} from './middlewares/checkOauth.middleware';
+import {CheckOauthMiddleware} from './middleware/checkOauth.middleware';
 import {RedisModule} from '../../config/redis/redis.module';
 
 @Module({
@@ -14,6 +14,6 @@ import {RedisModule} from '../../config/redis/redis.module';
 })
 export class ExtensionModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CheckOauthMiddleware).forRoutes({path: '*', method: RequestMethod.ALL});
+    consumer.apply(CheckOauthMiddleware).forRoutes({path: 'api/ext/*', method: RequestMethod.ALL});
   }
 }
