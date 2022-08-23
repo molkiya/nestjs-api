@@ -7,7 +7,10 @@ export class ExtensionController {
 
   @Get('')
   async getSiteStatus(@Query('origin') origin: string) {
-    if (!origin.startsWith('https://') || origin.length > 253) {
+    if (
+      !origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/) ||
+      origin.length > 253
+    ) {
       throw new HttpException('Bad Request', 400);
     }
     return await this.extensionService.getSiteStatus(origin);
