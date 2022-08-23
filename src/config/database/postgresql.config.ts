@@ -1,5 +1,12 @@
 import {TypeOrmModule} from '@nestjs/typeorm';
-import {DB_DEV, DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USERNAME} from '../app/app.config';
+import {
+  DB_DEV,
+  POSTGRESQL_DB_HOST,
+  POSTGRESQL_DB_NAME,
+  POSTGRESQL_DB_PASSWORD,
+  POSTGRESQL_DB_PORT,
+  POSTGRESQL_DB_USERNAME,
+} from '../app/app.config';
 import Entities from '../../api/extension/entities/entities';
 import {Module} from '@nestjs/common';
 
@@ -7,11 +14,11 @@ import {Module} from '@nestjs/common';
   imports: [
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: DB_HOST,
-      port: DB_PORT,
-      username: DB_USERNAME,
-      password: DB_PASSWORD,
-      database: DB_NAME,
+      host: POSTGRESQL_DB_HOST,
+      port: POSTGRESQL_DB_PORT,
+      username: POSTGRESQL_DB_USERNAME,
+      password: POSTGRESQL_DB_PASSWORD,
+      database: POSTGRESQL_DB_NAME,
       entities: Entities,
       synchronize: DB_DEV,
       logging: DB_DEV,
