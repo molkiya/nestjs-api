@@ -2,11 +2,17 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-export const DB_HOST: string = process.env.DB_HOST || 'databases';
-export const DB_PORT: number = Number(process.env.DB_PORT) || 5432;
-export const DB_USERNAME: string = process.env.DB_USERNAME || 'user';
-export const DB_PASSWORD: string = process.env.DB_PASSWORD || 'password';
-export const DB_NAME: string = process.env.DB_NAME || 'db';
+export const POSTGRESQL_DB_HOST: string = process.env.POSTGRESQL_DB_HOST || 'databases';
+export const POSTGRESQL_DB_PORT: number = Number(process.env.POSTGRESQL_DB_PORT) || 5432;
+export const POSTGRESQL_DB_USERNAME: string = process.env.POSTGRESQL_DB_USERNAME || 'user';
+export const POSTGRESQL_DB_PASSWORD: string = process.env.POSTGRESQL_DB_PASSWORD || 'password';
+export const POSTGRESQL_DB_NAME: string = process.env.POSTGRESQL_DB_NAME || 'db';
+
+export const MONGODB_HOST: string = process.env.MONGODB_HOST || 'databases';
+export const MONGODB_PORT: number = Number(process.env.MONGODB_PORT) || 27017;
+export const MONGODB_USERNAME: string = process.env.MONGODB_USERNAME || 'user';
+export const MONGODB_PASSWORD: string = process.env.MONGODB_PASSWORD || 'password';
+
 export const DB_DEV: boolean = JSON.parse(process.env.DB_DEV);
 
 export const CLIENT_ID: string = process.env.CLIENT_ID;
