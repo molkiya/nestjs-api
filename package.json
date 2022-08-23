@@ -12,6 +12,7 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "build:docker": "sudo docker-compose up --build",
+    "docs": "npx @compodoc/compodoc -p tsconfig.json -s",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
