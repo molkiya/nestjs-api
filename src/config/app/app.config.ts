@@ -13,7 +13,7 @@ export const MONGODB_PORT: number = Number(process.env.MONGODB_PORT) || 27017;
 export const MONGODB_USERNAME: string = process.env.MONGODB_USERNAME || 'user';
 export const MONGODB_PASSWORD: string = process.env.MONGODB_PASSWORD || 'password';
 
-export const DB_DEV: boolean = JSON.parse(process.env.DB_DEV);
+export const DB_DEV: boolean = JSON.parse('true');
 
 export const CLIENT_ID: string = process.env.CLIENT_ID;
 export const CLIENT_SECRET: string = process.env.CLIENT_SECRET;
