@@ -7,7 +7,7 @@ import {
   POSTGRESQL_DB_PORT,
   POSTGRESQL_DB_USERNAME,
 } from '../app/app.config';
-import Entities from '../../api/extension/entities/entities';
+import Entities from '../../api/entities/entities';
 import {Module} from '@nestjs/common';
 
 @Module({
