@@ -1,10 +1,10 @@
 import {Injectable} from '@nestjs/common';
 
 @Injectable()
-export class UploadFileService {
+export class ClientService {
   constructor() {}
 
-  public async uploadData(file) {
-    console.log(file);
+  public async uploadData(data) {
+    console.log('data', data);
   }
 }
