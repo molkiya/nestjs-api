@@ -6,9 +6,20 @@ import Entities from './entities/entities';
 
 import {CheckOauthMiddleware} from './middleware/checkOauth.middleware';
 import {RedisModule} from '../../config/redis/redis.module';
+import {MongooseModule} from '@nestjs/mongoose';
+import {CachedSite, CachedSiteSchema} from '../schemas/site.schema';
 
 @Module({
-  imports: [TypeOrmModule.forFeature(Entities), RedisModule],
+  imports: [
+    TypeOrmModule.forFeature(Entities),
+    RedisModule,
+    MongooseModule.forFeature([
+      {
+        name: CachedSite.name,
+        schema: CachedSiteSchema,
+      },
+    ]),
+  ],
   controllers: [ExtensionController],
   providers: [ExtensionService],
 })

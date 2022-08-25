@@ -38,6 +38,23 @@ services:
   #    volumes:
   #      - /var/run/docker.sock:/var/run/docker.sock
   #      - /api/src:/usr/app/src
+  mongodb:
+    image: mongo:5.0.0
+    container_name: mongodb_dev
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: tom
+    networks:
+      - default
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
   postgres:
     container_name: postgres_dev
     image: postgres:14
@@ -55,6 +72,7 @@ services:
       - postgres:/data/database
     restart: unless-stopped
   redis:
+    container_name: redis_dev
     image: redis:6.2-alpine
     restart: always
     ports:

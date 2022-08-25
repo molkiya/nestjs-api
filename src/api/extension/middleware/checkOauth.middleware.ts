@@ -45,7 +45,6 @@ export class CheckOauthMiddleware implements NestMiddleware {
         await this.redis.expire(oauthToken.toString(), time);
         next();
       } else {
-        console.log('DOMAIN');
         throw new HttpException('Unauthorized', 401);
       }
     }

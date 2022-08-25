@@ -8,6 +8,11 @@ import WhoisEntity from '../entities/entities/whois.entity';
 import SitesEntity from '../entities/entities/sites.entity';
 import {GREEN} from '../../utils/icons.utils';
 import {SECONDS_HOUR_MILLISEC} from '../../utils/enum.utils';
+import {SiteStatus} from '../../../utils/status.utils';
+import {SiteTitle} from '../../../utils/title.utils';
+import {InjectModel} from '@nestjs/mongoose';
+import {CachedSite, CachedSiteDocument} from '../../schemas/site.schema';
+import {Model} from 'mongoose';
 
 @Injectable()
 export class ExtensionService {
@@ -18,9 +23,16 @@ export class ExtensionService {
     private whoisRepository: Repository<WhoisEntity>,
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,
+    @InjectModel(CachedSite.name) private readonly cachedSiteModel: Model<CachedSiteDocument>,
   ) {}
 
   public async getSiteStatus(name: string) {
+    const cachedSite = await this.cachedSiteModel.findOne({'site.fqdn': name});
+
+    if (cachedSite) {
+      return cachedSite;
+    }
+
     const item = await this.sitesRepository.findOne({
       where: {
         fqdn: name,
@@ -36,7 +48,7 @@ export class ExtensionService {
           ts: 'DESC',
         },
       });
-      this.updateSite(
+      await this.updateSite(
         {
           site: item,
           whois: whois,
@@ -51,12 +63,13 @@ export class ExtensionService {
     }
 
     const site = await this.createSite(name);
-    return this.updateSite(site, SECONDS_HOUR_MILLISEC, `./icons/${GREEN}.png`);
+    return await this.updateSite(site, SECONDS_HOUR_MILLISEC, `./icons/${GREEN}.png`);
   }
 
-  private updateSite(site: any, ttl: number, path: string) {
+  private async updateSite(site: any, ttl: number, path: string) {
     site.site['ttl'] = ttl;
     site.site.path = path;
+    await this.cachedSiteModel.create(site);
     return site;
   }
 
@@ -78,8 +91,8 @@ export class ExtensionService {
       .values({
         fqdn: name,
         created_by: 1,
-        status: 'NEW',
-        title: 'Ready for work',
+        status: SiteStatus.NEW,
+        title: SiteTitle.READY,
       })
       .returning('*')
       .execute();
