@@ -21,6 +21,7 @@ export class ExtensionController {
       !origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/) ||
       origin.length > 253
     ) {
+      console.log('bad');
       throw new HttpException('Bad Request', 400);
     }
 
@@ -48,7 +49,6 @@ export class ExtensionController {
     ) {
       throw new HttpException('Bad Request', 400);
     }
-    // TODO: MongoDB caching update
     await this.sitesService.assignSite(body.origin, email);
     res.json({message: 'OK'});
   }

@@ -48,7 +48,6 @@ export class CheckOauthMiddlewareExtension implements NestMiddleware {
         res.locals.email = newOauthToken.email;
         next();
       } else {
-        console.log('DOMAIN');
         throw new HttpException('Unauthorized', 401);
       }
     }

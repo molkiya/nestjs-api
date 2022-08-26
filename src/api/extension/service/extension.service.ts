@@ -3,9 +3,13 @@ import {HttpException, Inject, Injectable} from '@nestjs/common';
 import {InjectRepository} from '@nestjs/typeorm';
 import {Repository} from 'typeorm';
 import Redis from 'ioredis';
-
-import WhoisEntity from '../../entities/entities/whois.entity';
+import {SiteStatus} from '../../../utils/status.utils';
+import {SiteTitle} from '../../../utils/title.utils';
+import {InjectModel} from '@nestjs/mongoose';
+import {CachedSite, CachedSiteDocument} from '../../schemas/site.schema';
+import {Model} from 'mongoose';
 import SitesEntity from '../../entities/entities/sites.entity';
+import WhoisEntity from '../../entities/entities/whois.entity';
 
 @Injectable()
 export class ExtensionService {
@@ -16,9 +20,16 @@ export class ExtensionService {
     private whoisRepository: Repository<WhoisEntity>,
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,
+    @InjectModel(CachedSite.name) private readonly cachedSiteModel: Model<CachedSiteDocument>,
   ) {}
 
   public async getSite(origin: string) {
+    const cachedSite = await this.cachedSiteModel.findOne({'site.fqdn': name});
+
+    if (cachedSite) {
+      return cachedSite;
+    }
+
     const site = await this.sitesRepository.findOne({
       where: {
         fqdn: origin,
@@ -84,8 +95,8 @@ export class ExtensionService {
       .values({
         fqdn: origin,
         created_by: email,
-        status: 'NEW',
-        title: 'Ready for work',
+        status: SiteStatus.NEW,
+        title: SiteTitle.READY,
       })
       .returning('*')
       .execute();
@@ -107,9 +118,10 @@ export class ExtensionService {
     };
   }
 
-  public updateSiteInfo(site: any, ttl: number, path: string) {
+  public async updateSiteInfo(site: any, ttl: number, path: string) {
     site.site['ttl'] = ttl;
     site.site.path = path;
+    await this.cachedSiteModel.create(site);
     return site;
   }
 }

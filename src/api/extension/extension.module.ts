@@ -4,14 +4,23 @@ import {ExtensionService} from './service/extension.service';
 import {TypeOrmModule} from '@nestjs/typeorm';
 import Entities from '../entities/entities';
 import {RedisModule} from '../../config/redis/redis.module';
-import {PostgreSQLModule} from '../../config/database/postgresql.config';
+import {MongooseModule} from '@nestjs/mongoose';
+import {CachedSite, CachedSiteSchema} from '../schemas/site.schema';
 import {CheckOauthMiddlewareExtension} from './middleware/checkOauth.middleware';
 
 @Module({
-  imports: [TypeOrmModule.forFeature(Entities), RedisModule, PostgreSQLModule],
-  providers: [ExtensionService],
+  imports: [
+    TypeOrmModule.forFeature(Entities),
+    RedisModule,
+    MongooseModule.forFeature([
+      {
+        name: CachedSite.name,
+        schema: CachedSiteSchema,
+      },
+    ]),
+  ],
   controllers: [ExtensionController],
-  exports: [ExtensionService],
+  providers: [ExtensionService],
 })
 export class ExtensionModule {
   configure(consumer: MiddlewareConsumer) {
