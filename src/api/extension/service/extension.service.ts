@@ -60,7 +60,7 @@ export class ExtensionService {
     }
 
     if (site.assigned_by) {
-      throw new HttpException('Site already assigned', 401);
+      throw new HttpException('Site already assigned', 406);
     }
 
     // TODO: Create Users table

@@ -20,14 +20,14 @@ export class ClientController {
   @Post('upload')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('file'))
-  async uploadFiles(@UploadedFiles() file, @Response() res, @Body() body: BodyDto) {
+  async uploadFiles(@UploadedFiles() files, @Response() res, @Body() body: BodyDto) {
     const email = res.locals.email;
     if (!email) {
       throw new HttpException('Bad Request / Invalid Token', 400);
     }
-    if (file) {
+    if (files) {
       await fs
-        .createReadStream(path.resolve(__dirname, '../../../..', 'uploads', `${file[0].filename}`))
+        .createReadStream(path.resolve(__dirname, '../../../..', 'uploads', `${files[0].filename}`))
         .pipe(csv.parse())
         .on('error', (error) => console.error(error))
         .on('data', async (data) => {
@@ -41,11 +41,11 @@ export class ClientController {
           await this.extensionService.createSite(data[0], email);
         })
         .on('end', (rowCount: number) => {
-          fs.rmSync(path.resolve(__dirname, '../../../..', 'uploads', `${file[0].filename}`));
+          fs.rmSync(path.resolve(__dirname, '../../../..', 'uploads', `${files[0].filename}`));
           console.log(`Parsed ${rowCount} rows`);
         });
     } else {
-      body.domains.map(async (domain) => {
+      const result = body.domains.map(async (domain) => {
         if (
           !domain.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/) ||
           domain.length > 253
@@ -54,6 +54,8 @@ export class ClientController {
         }
         await this.extensionService.createSite(domain, email);
       });
+      if (!result) throw new HttpException('Server Error', 500);
+      return res.json({message: 'OK'});
     }
   }
 }
