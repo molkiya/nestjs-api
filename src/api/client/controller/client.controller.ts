@@ -37,6 +37,7 @@ export class ClientController {
           ) {
             throw new HttpException('Bad Request', 400);
           }
+
           await this.extensionService.createSite(data[0], email);
         })
         .on('end', (rowCount: number) => {
