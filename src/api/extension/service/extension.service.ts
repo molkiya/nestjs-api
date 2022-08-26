@@ -18,14 +18,16 @@ export class ExtensionService {
     private readonly redis: Redis,
   ) {}
 
-  public async getSite(name: string) {
+  public async getSite(origin: string) {
     const site = await this.sitesRepository.findOne({
       where: {
-        fqdn: name,
+        fqdn: origin,
       },
     });
 
-    if (!site) return false;
+    if (!site) {
+      return null;
+    }
 
     const whois = await this.whoisRepository.findOne({
       where: {
@@ -41,10 +43,31 @@ export class ExtensionService {
     };
   }
 
-  public async createSite(name: string) {
+  public async assignSite(origin: string, email: string) {
+    const site = await this.sitesRepository.findOne({
+      where: {
+        fqdn: origin,
+      },
+    });
+
+    console.log(site);
+
+    if (!site) {
+      throw new HttpException('Site not exist', 401);
+    }
+
+    // TODO: Create Users table
+    const emailNumber = 1;
+
+    return await this.sitesRepository.update(site.id, {
+      assigned_by: emailNumber,
+    });
+  }
+
+  public async createSite(origin: string, email: string) {
     const request = {
       data: {
-        test: name,
+        test: origin,
       },
     };
 
@@ -57,8 +80,8 @@ export class ExtensionService {
       .insert()
       .into(SitesEntity)
       .values({
-        fqdn: name,
-        created_by: 1,
+        fqdn: origin,
+        created_by: email,
         status: 'NEW',
         title: 'Ready for work',
       })
@@ -82,7 +105,7 @@ export class ExtensionService {
     };
   }
 
-  public updateSite(site: any, ttl: number, path: string) {
+  public updateSiteInfo(site: any, ttl: number, path: string) {
     site.site['ttl'] = ttl;
     site.site.path = path;
     return site;

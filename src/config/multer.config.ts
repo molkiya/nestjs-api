@@ -8,7 +8,7 @@ export class MulterConfig implements MulterOptionsFactory {
   createMulterOptions(): MulterModuleOptions {
     return {
       storage: diskStorage({
-        destination: './src/api/client/uploads',
+        destination: './uploads',
         filename: filename,
       }),
       fileFilter: fileFilter,

@@ -17,16 +17,5 @@ export class ClientService {
 
   public async uploadData(data, stream) {
     console.log(stream);
-    // const csvData = [];
-    // const csvStream = fastcsv
-    //   .parse()
-    //   .on('data', function (data) {
-    //     csvData.push(data);
-    //   })
-    //   .on('end', function () {
-    //     // remove the first line: header
-    //     csvData.shift();
-    //   });
-    // stream.pipe(csvStream);
   }
 }
