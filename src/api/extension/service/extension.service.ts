@@ -24,12 +24,6 @@ export class ExtensionService {
   ) {}
 
   public async getSite(origin: string) {
-    const cachedSite = await this.cachedSiteModel.findOne({'site.fqdn': name});
-
-    if (cachedSite) {
-      return cachedSite;
-    }
-
     const site = await this.sitesRepository.findOne({
       where: {
         fqdn: origin,
@@ -118,9 +112,19 @@ export class ExtensionService {
     };
   }
 
-  public async updateSiteInfo(site: any, ttl: number, path: string) {
+  public async updateSiteCache(origin: string, assigned_by: number) {
+    await this.cachedSiteModel.findOneAndUpdate(
+      {'site.fqdn': origin},
+      {
+        'site.assigned_by': assigned_by,
+      },
+    );
+  }
+
+  public async updateSiteInfo(site: any, ttl: number, path: string, assigned_by = null) {
     site.site['ttl'] = ttl;
     site.site.path = path;
+    site.site.assigned_by = assigned_by;
     await this.cachedSiteModel.create(site);
     return site;
   }

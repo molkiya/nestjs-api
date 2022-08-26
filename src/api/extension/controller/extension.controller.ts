@@ -3,12 +3,16 @@ import {SECONDS_HOUR_MILLISEC} from '../../utils/enum.utils';
 import {GREEN} from '../../utils/icons.utils';
 import {ExtensionService} from '../service/extension.service';
 import {assignSiteDto} from '../../dto/getSite.dto';
+import {InjectModel} from '@nestjs/mongoose';
+import {CachedSite, CachedSiteDocument} from '../../schemas/site.schema';
+import {Model} from 'mongoose';
 
 @Controller('ext')
 export class ExtensionController {
   constructor(
     @Inject(ExtensionService)
     private readonly sitesService: ExtensionService,
+    @InjectModel(CachedSite.name) private readonly cachedSiteModel: Model<CachedSiteDocument>,
   ) {}
 
   @Get('')
@@ -25,14 +29,22 @@ export class ExtensionController {
       throw new HttpException('Bad Request', 400);
     }
 
+    const cachedSite = await this.cachedSiteModel.findOne({'site.fqdn': origin});
+    if (cachedSite) {
+      return res.json(cachedSite);
+    }
+
+    console.log(cachedSite);
+
     const site = await this.sitesService.getSite(origin);
+
     if (site) {
-      const updated = this.sitesService.updateSiteInfo(site, SECONDS_HOUR_MILLISEC, `./icons/${GREEN}.png`);
+      const updated = await this.sitesService.updateSiteInfo(site, SECONDS_HOUR_MILLISEC, `./icons/${GREEN}.png`, 1);
       return res.json(updated);
     }
 
     const newSite = await this.sitesService.createSite(origin, email);
-    const updateSite = this.sitesService.updateSiteInfo(newSite, SECONDS_HOUR_MILLISEC, `./icons/${GREEN}.png`);
+    const updateSite = await this.sitesService.updateSiteInfo(newSite, SECONDS_HOUR_MILLISEC, `./icons/${GREEN}.png`);
     return res.json(updateSite);
   }
 
@@ -50,6 +62,7 @@ export class ExtensionController {
       throw new HttpException('Bad Request', 400);
     }
     await this.sitesService.assignSite(body.origin, email);
-    res.json({message: 'OK'});
+    await this.sitesService.updateSiteCache(body.origin, 1);
+    return res.json({message: 'OK'});
   }
 }

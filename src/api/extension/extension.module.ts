@@ -21,6 +21,7 @@ import {CheckOauthMiddlewareExtension} from './middleware/checkOauth.middleware'
   ],
   controllers: [ExtensionController],
   providers: [ExtensionService],
+  exports: [ExtensionService],
 })
 export class ExtensionModule {
   configure(consumer: MiddlewareConsumer) {

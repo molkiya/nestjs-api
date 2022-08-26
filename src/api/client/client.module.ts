@@ -9,6 +9,9 @@ import Entities from '../entities/entities';
 import {RedisModule} from '../../config/redis/redis.module';
 import {ExtensionModule} from '../extension/extension.module';
 import {CheckOauthMiddlewareClient} from './middleware/checkToken.middleware';
+import {MongoDBModule} from '../../config/database/mongodb.config';
+import {MongooseModule} from '@nestjs/mongoose';
+import {CachedSite, CachedSiteSchema} from '../schemas/site.schema';
 
 @Module({
   imports: [
@@ -19,6 +22,13 @@ import {CheckOauthMiddlewareClient} from './middleware/checkToken.middleware';
     PostgreSQLModule,
     RedisModule,
     ExtensionModule,
+    MongoDBModule,
+    MongooseModule.forFeature([
+      {
+        name: CachedSite.name,
+        schema: CachedSiteSchema,
+      },
+    ]),
   ],
   providers: [ClientService],
   controllers: [ClientController],

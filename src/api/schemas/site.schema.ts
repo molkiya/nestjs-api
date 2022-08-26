@@ -13,11 +13,14 @@ class NestedSite {
   @Prop({type: String})
   fqdn: string;
 
-  @Prop({type: Number})
-  created_by: number;
+  @Prop({type: String})
+  created_by: string;
 
   @Prop({type: String})
   created_at: string;
+
+  @Prop({type: Number})
+  assigned_by: number;
 
   @Prop({type: String, enum: SiteStatus})
   status: SiteStatus;
@@ -56,12 +59,14 @@ class NestedWhois {
   raw: NestedRaw;
 }
 
-@Schema({
-  capped: {
-    size: 5242880,
-    autoIndexId: true,
-  },
-})
+// {
+//   capped: {
+//     size: 5242880,
+//       autoIndexId: true,
+//   },
+// }
+
+@Schema()
 export class CachedSite {
   @Prop({type: NestedSite})
   site: NestedSite;
