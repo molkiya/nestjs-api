@@ -14,16 +14,22 @@ export default class SitesEntity {
   fqdn: string;
 
   @Column({
-    type: 'int',
+    type: 'text',
     nullable: false,
   })
-  created_by: number;
+  created_by: string;
 
   @CreateDateColumn({
     type: 'timestamp',
     nullable: false,
   })
   created_at: Date;
+
+  @Column({
+    type: 'int',
+    nullable: true,
+  })
+  assigned_by: number;
 
   @Column({
     nullable: false,

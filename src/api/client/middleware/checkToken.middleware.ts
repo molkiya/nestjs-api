@@ -2,10 +2,9 @@ import {HttpException, Inject, Injectable, NestMiddleware} from '@nestjs/common'
 import {NextFunction, Request, Response} from 'express';
 import Redis from 'ioredis';
 import {getOauthClient} from '../../utils/oauthClient.utils';
-import {DOMAIN_LIST} from '../../utils/email.utils';
 
 @Injectable()
-export class CheckOauthMiddlewareExtension implements NestMiddleware {
+export class CheckOauthMiddlewareClient implements NestMiddleware {
   constructor(
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,
@@ -24,6 +23,7 @@ export class CheckOauthMiddlewareExtension implements NestMiddleware {
     if (redisResult) {
       const emailResult = JSON.parse(redisResult);
       res.locals.email = emailResult.email;
+      console.log('redis', res.locals.email);
       next();
     } else {
       let newOauthToken;
@@ -35,22 +35,13 @@ export class CheckOauthMiddlewareExtension implements NestMiddleware {
         throw new HttpException('Unauthorized', 401);
       }
 
-      if (
-        newOauthToken.email_verified &&
-        DOMAIN_LIST.map((DOMAIN: string) => {
-          return newOauthToken.email.endsWith(DOMAIN);
-        }).includes(true)
-      ) {
-        const time = this.seconds_since_epoch(newOauthToken.expiry_date) - this.seconds_since_epoch(Date.now());
-        const value = Buffer.from(JSON.stringify(newOauthToken));
-        await this.redis.set(oauthToken.toString(), value);
-        await this.redis.expire(oauthToken.toString(), time);
-        res.locals.email = newOauthToken.email;
-        next();
-      } else {
-        console.log('DOMAIN');
-        throw new HttpException('Unauthorized', 401);
-      }
+      const time = this.seconds_since_epoch(newOauthToken.expiry_date) - this.seconds_since_epoch(Date.now());
+      const value = Buffer.from(JSON.stringify(newOauthToken));
+      await this.redis.set(oauthToken.toString(), value);
+      await this.redis.expire(oauthToken.toString(), time);
+      res.locals.email = newOauthToken.email;
+      console.log('google', res.locals.email);
+      next();
     }
   }
 
