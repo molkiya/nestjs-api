@@ -42,6 +42,7 @@ export class ExtensionController {
       throw new HttpException('Bad Request', 400);
     }
     // TODO: MongoDB caching update
-    return await this.sitesService.assignSite(body.origin, body.email);
+    await this.sitesService.assignSite(body.origin, body.email);
+    return {message: 'OK'};
   }
 }
