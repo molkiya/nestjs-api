@@ -14,6 +14,6 @@ import {RedisModule} from '../../config/redis/redis.module';
 })
 export class ExtensionModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CheckOauthMiddleware).forRoutes({path: 'api/ext/*', method: RequestMethod.ALL});
+    consumer.apply(CheckOauthMiddleware).forRoutes({path: 'ext', method: RequestMethod.ALL});
   }
 }
