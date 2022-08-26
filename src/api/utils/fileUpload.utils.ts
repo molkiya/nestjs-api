@@ -1,10 +1,6 @@
 export const filename = (req, file, callback) => {
-  let customFile = file.originalname.split('.')[0];
-  customFile += Date.now() + '-' + Math.round(Math.random() * 16);
-  let fileExtension = '';
-  if (file.mimetype.indexOf('.csv') > -1) fileExtension = '.csv';
-  customFile += fileExtension;
-  callback(null, customFile);
+  const fileName = Date.now() + '-' + file.originalname;
+  callback(null, fileName);
 };
 
 export const fileFilter = (req, file, callback) => {
