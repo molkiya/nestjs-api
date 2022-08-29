@@ -113,12 +113,18 @@ export class ExtensionService {
   }
 
   public async updateSiteCache(origin: string, assigned_by: number) {
-    await this.cachedSiteModel.findOneAndUpdate(
+    const updatedSite = await this.cachedSiteModel.findOneAndUpdate(
       {'site.fqdn': origin},
       {
         'site.assigned_by': assigned_by,
       },
+      {new: true},
     );
+
+    if (!updatedSite) {
+      return new HttpException('Update site cache failed', 500);
+    }
+    return updatedSite;
   }
 
   public async updateSiteInfo(site: any, ttl: number, path: string, assigned_by = null) {

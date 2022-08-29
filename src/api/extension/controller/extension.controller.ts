@@ -62,7 +62,7 @@ export class ExtensionController {
       throw new HttpException('Bad Request', 400);
     }
     await this.sitesService.assignSite(body.origin, email);
-    await this.sitesService.updateSiteCache(body.origin, 1);
-    return res.json({message: 'OK'});
+    const updatedSiteCached = await this.sitesService.updateSiteCache(body.origin, 1);
+    return res.json(updatedSiteCached);
   }
 }
