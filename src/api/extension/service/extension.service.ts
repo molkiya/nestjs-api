@@ -1,7 +1,5 @@
 import {HttpException, Inject, Injectable} from '@nestjs/common';
 import Redis from 'ioredis';
-import {SiteStatus} from '../../../utils/status.utils';
-import {SiteTitle} from '../../../utils/title.utils';
 import {InjectModel} from '@nestjs/mongoose';
 import {CachedSite, CachedSiteDocument} from '../../schemas/site.schema';
 import {Model} from 'mongoose';
@@ -52,10 +50,12 @@ export class ExtensionService {
   }
 
   public async createSite(origin: string, email: string) {
-    const a = await this.conn.query(
-      `INSERT INTO sites (fqdn, created_by, status, title) VALUES ('${origin}', '${email}', '${SiteStatus.NEW}', '${SiteTitle.READY}')`,
+    const url = new URL(origin);
+    let https = false;
+    if (url.protocol === 'https:') https = !https;
+    await this.conn.query(
+      `INSERT INTO sites (fqdn, created_by, https, suppress, cabinet) VALUES ('${url.hostname}', 1, ${https}, false, false)`,
     );
-    console.log(a);
     const site = await this.conn.query(`SELECT * FROM sites WHERE fqdn = '${origin}'`);
 
     return {
