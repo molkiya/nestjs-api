@@ -40,6 +40,7 @@
     "ioredis": "5.2.2",
     "mongodb": "4.9.0",
     "pg": "8.7.3",
+    "promisify": "^0.0.3",
     "reflect-metadata": "0.1.13",
     "rimraf": "3.0.2",
     "rxjs": "7.5.6"
