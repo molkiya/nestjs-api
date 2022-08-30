@@ -1,14 +1,13 @@
 import {MiddlewareConsumer, Module, RequestMethod} from '@nestjs/common';
 import {ExtensionController} from './controller/extension.controller';
 import {ExtensionService} from './service/extension.service';
-import {TypeOrmModule} from '@nestjs/typeorm';
-import Entities from '../entities/entities';
 import {RedisModule} from '../../config/redis/redis.module';
 import {CheckOauthMiddlewareExtension} from './middleware/checkOauth.middleware';
 import {MongoDBModule} from '../../config/database/mongodb.config';
+import {PostgreSQLModule} from '../../config/database/postgresql.config';
 
 @Module({
-  imports: [TypeOrmModule.forFeature(Entities), RedisModule, MongoDBModule],
+  imports: [RedisModule, MongoDBModule, PostgreSQLModule],
   controllers: [ExtensionController],
   providers: [ExtensionService],
   exports: [ExtensionService],

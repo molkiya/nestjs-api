@@ -1,8 +1,8 @@
 import {Body, Controller, Get, HttpException, Inject, Post, Query, Response} from '@nestjs/common';
-import {GREEN} from '../../utils/icons.utils';
 import {ExtensionService} from '../service/extension.service';
 import {assignSiteDto} from '../../dto/getSite.dto';
 import Redis from 'ioredis';
+import {Db} from 'mongodb';
 
 @Controller('ext')
 export class ExtensionController {
@@ -11,13 +11,13 @@ export class ExtensionController {
     private readonly sitesService: ExtensionService,
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,
+    @Inject('MONGODB_CONNECTION')
+    private readonly mongodb: Db,
   ) {}
 
   @Get('')
   async getSite(@Query('origin') origin: string, @Response() res) {
-    if (!res.locals.email) {
-      throw new HttpException('Bad Request / Invalid Token', 400);
-    }
+    const accountId: number = res.locals.account;
 
     if (
       !origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/) ||
@@ -26,44 +26,57 @@ export class ExtensionController {
       throw new HttpException('Bad Request', 400);
     }
 
-    const redisResult = await this.redis.get(origin);
+    const redisResult = await this.redis.get(new URL(origin).hostname);
 
     if (redisResult) {
-      console.log('redisResult', redisResult);
-      const updated = await this.sitesService.updateSiteInfo(JSON.parse(redisResult), `./icons/${GREEN}.png`, 1);
-      return res.json(updated);
+      console.log('redisSite:    ', redisResult);
+      const site = JSON.parse(redisResult);
+      await this.mongodb.collection('sites').insertOne({
+        ...site.site,
+      });
+      return res.json(JSON.parse(redisResult));
     }
 
     const site = await this.sitesService.getSite(origin);
 
-    if (site) {
-      await this.redis.set(origin, JSON.stringify(site));
-      await this.sitesService.cacheSite(origin, site);
-      const updated = await this.sitesService.updateSiteInfo(site, `./icons/${GREEN}.png`, 1);
-      return res.json(updated);
+    if (site.rows.length) {
+      console.log('foundSite:    ', site.rows.length);
+      const responseSite = await this.sitesService.cacheSite(origin, site.rows[0]);
+      await this.mongodb.collection('sites').insertOne({
+        ...responseSite,
+      });
+      return res.json({
+        site: responseSite,
+      });
     }
 
-    const newSite = await this.sitesService.createSite(origin, res.locals.email);
-    await this.sitesService.cacheSite(origin, newSite);
-    const updateSite = await this.sitesService.updateSiteInfo(newSite, `./icons/${GREEN}.png`);
-    return res.json(updateSite);
+    const newSite = await this.sitesService.createSite(origin, accountId);
+    console.log('createdSite:      ', newSite.rows[0]);
+    const responseSite = await this.sitesService.cacheSite(origin, newSite.rows[0]);
+    await this.mongodb.collection('sites').insertOne({
+      ...responseSite,
+    });
+    return res.json({
+      site: responseSite,
+    });
   }
 
   @Post('assign')
   async assignSite(@Body() body: assignSiteDto, @Response() res) {
-    const email = res.locals.email;
-    if (!body.origin || !email) {
-      throw new HttpException('Bad Request', 400);
-    }
-
     if (
       !body.origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/) ||
       body.origin.length > 253
     ) {
       throw new HttpException('Bad Request', 400);
     }
-    const newSite = await this.sitesService.assignSite(body.origin, email);
-    const updateSite = await this.sitesService.updateSiteInfo(newSite, `./icons/${GREEN}.png`, 1);
-    return res.json(updateSite);
+
+    const result = await this.sitesService.assignSite(body.origin, res.locals.account);
+    const updatedSiteCached = await this.sitesService.cacheSite(body.origin, result.rows[0]);
+    await this.mongodb.collection('sites').insertOne({
+      ...updatedSiteCached,
+    });
+    return res.json({
+      site: updatedSiteCached,
+    });
   }
 }

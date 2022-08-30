@@ -4,6 +4,7 @@ import {initOauth} from './api/utils/oauthClient.utils';
 import {APP_PORT} from './config/app/app.config';
 import {DocumentBuilder, SwaggerModule} from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import {pgInit} from './config/database/postgresql.config';
 
 async function bootstrap() {
   const PORT: number = APP_PORT;
@@ -25,6 +26,7 @@ async function bootstrap() {
   app.use(bodyParser.json({limit: '1mb'}));
   app.use(bodyParser.urlencoded({limit: '1mb', extended: true}));
   initOauth();
+  await pgInit();
 
   await app.listen(PORT, () => {
     console.log('Server starting at:', PORT);
