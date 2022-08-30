@@ -9,57 +9,48 @@ import {PG_CONNECTION} from '../../utils/pgConnection';
 export class ExtensionService {
   constructor(
     @Inject(PG_CONNECTION)
-    private conn: any,
+    private readonly pg: any,
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,
     @InjectModel(CachedSite.name) private readonly cachedSiteModel: Model<CachedSiteDocument>,
   ) {}
 
   public async getSite(origin: string) {
-    const site = await this.conn.query(`SELECT * FROM sites WHERE fqdn = '${origin}'`);
-
-    console.log(site);
-
-    if (!site[0]) {
-      return null;
-    }
-
-    return {
-      site: site[0],
-    };
+    return await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${new URL(origin).hostname}'`);
   }
 
-  public async assignSite(origin: string, email: string) {
-    const site = await this.conn.query(`SELECT * FROM sites WHERE fqdn = '${origin}'`);
+  public async assignSite(origin: string, accountId: number) {
+    const url = new URL(origin);
+    const site = await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${url.hostname}'`);
 
-    if (!site[0]) {
+    if (!site.rows[0]) {
       throw new HttpException('Site not exist', 401);
     }
 
-    if (site[0].assigned_by) {
+    if (site.rows[0].assigned_by) {
       throw new HttpException('Site already assigned', 406);
     }
 
-    // TODO: Create Users table
-    const emailNumber = 1;
+    await this.pg.query(
+      `UPDATE sites SET assigned_by = ${accountId}, assigned_at = NOW() WHERE fqdn = '${url.hostname}'`,
+    );
 
-    await this.conn.query(`UPDATE sites SET assigned_by = ${emailNumber} WHERE fqdn = '${origin}'`);
-
-    const updatedSite = await this.conn.query(`SELECT * FROM sites WHERE fqdn = '${origin}'`);
-    return updatedSite[0];
+    const updatedSite = await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${url.hostname}'`);
+    return updatedSite;
   }
 
-  public async createSite(origin: string, email: string) {
+  public async createSite(origin: string, accountId: number) {
+    console.log(origin, accountId);
     const url = new URL(origin);
     let https = false;
     if (url.protocol === 'https:') https = !https;
-    await this.conn.query(
-      `INSERT INTO sites (fqdn, created_by, https, suppress, cabinet) VALUES ('${url.hostname}', 1, ${https}, false, false)`,
+    await this.pg.query(
+      `INSERT INTO sites (fqdn, created_by, https, suppress, cabinet) VALUES ('${url.hostname}', ${accountId}, ${https}, false, false)`,
     );
-    const site = await this.conn.query(`SELECT * FROM sites WHERE fqdn = '${origin}'`);
-
+    const site = await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${url.hostname}'`);
+    console.log('createsite');
     return {
-      site: site[0],
+      site: site.rows[0],
     };
   }
 
@@ -82,7 +73,7 @@ export class ExtensionService {
     site.site['ttl'] = ttl;
     site.site.path = path;
     site.site.assigned_by = assigned_by;
-    await this.cachedSiteModel.create(site);
+    // await this.cachedSiteModel.create(site);
     return site;
   }
 }
