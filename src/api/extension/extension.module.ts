@@ -1,16 +1,14 @@
 import {MiddlewareConsumer, Module, RequestMethod} from '@nestjs/common';
 import {ExtensionController} from './controller/extension.controller';
 import {ExtensionService} from './service/extension.service';
-import {TypeOrmModule} from '@nestjs/typeorm';
-import Entities from '../entities/entities';
 import {RedisModule} from '../../config/redis/redis.module';
 import {MongooseModule} from '@nestjs/mongoose';
 import {CachedSite, CachedSiteSchema} from '../schemas/site.schema';
 import {CheckOauthMiddlewareExtension} from './middleware/checkOauth.middleware';
+import {PostgreSQLModule} from '../../config/database/postgresql.config';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature(Entities),
     RedisModule,
     MongooseModule.forFeature([
       {
@@ -18,6 +16,7 @@ import {CheckOauthMiddlewareExtension} from './middleware/checkOauth.middleware'
         schema: CachedSiteSchema,
       },
     ]),
+    PostgreSQLModule,
   ],
   controllers: [ExtensionController],
   providers: [ExtensionService],
