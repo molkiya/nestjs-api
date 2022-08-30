@@ -112,9 +112,9 @@ export class ExtensionService {
     };
   }
 
-  public async updateSiteInfo(site: any, ttl: number, path: string, assigned_by = null) {
-    site.site['ttl'] = ttl;
-    site.site.path = path;
+  public async updateSiteInfo(site: any, assigned_by = null) {
+    site.site['ttl'] = this.setTTL(site);
+    site.site.path = setT;
     site.site.assigned_by = assigned_by;
     await this.mongodb.collection('sites').insertOne(site);
     return site;
@@ -126,6 +126,17 @@ export class ExtensionService {
   }
 
   private setTTL(site: any) {
+    switch (site.site.status) {
+      case 'NEW':
+        return (site.site.ttl = this.seconds_since_epoch(MINUTE_MILLISEC));
+      case 'SUP':
+        return (site.site.ttl = this.seconds_since_epoch(DAY_MILLISEC) * 30);
+      default:
+        return (site.site.ttl = this.seconds_since_epoch(MINUTE_MILLISEC));
+    }
+  }
+
+  private setIcon(site: any) {
     switch (site.site.status) {
       case 'NEW':
         return (site.site.ttl = this.seconds_since_epoch(MINUTE_MILLISEC));

@@ -3,7 +3,6 @@ import {GREEN} from '../../utils/icons.utils';
 import {ExtensionService} from '../service/extension.service';
 import {assignSiteDto} from '../../dto/getSite.dto';
 import Redis from 'ioredis';
-import {HOUR_MILLISEC} from '../../utils/enum.utils';
 
 @Controller('ext')
 export class ExtensionController {
@@ -31,12 +30,7 @@ export class ExtensionController {
 
     if (redisResult) {
       console.log('redisResult', redisResult);
-      const updated = await this.sitesService.updateSiteInfo(
-        JSON.parse(redisResult),
-        HOUR_MILLISEC,
-        `./icons/${GREEN}.png`,
-        1,
-      );
+      const updated = await this.sitesService.updateSiteInfo(JSON.parse(redisResult), `./icons/${GREEN}.png`, 1);
       return res.json(updated);
     }
 
@@ -45,13 +39,13 @@ export class ExtensionController {
     if (site) {
       await this.redis.set(origin, JSON.stringify(site));
       await this.sitesService.cacheSite(origin, site);
-      const updated = await this.sitesService.updateSiteInfo(site, HOUR_MILLISEC, `./icons/${GREEN}.png`, 1);
+      const updated = await this.sitesService.updateSiteInfo(site, `./icons/${GREEN}.png`, 1);
       return res.json(updated);
     }
 
     const newSite = await this.sitesService.createSite(origin, res.locals.email);
     await this.sitesService.cacheSite(origin, newSite);
-    const updateSite = await this.sitesService.updateSiteInfo(newSite, HOUR_MILLISEC, `./icons/${GREEN}.png`);
+    const updateSite = await this.sitesService.updateSiteInfo(newSite, `./icons/${GREEN}.png`);
     return res.json(updateSite);
   }
 
@@ -69,7 +63,7 @@ export class ExtensionController {
       throw new HttpException('Bad Request', 400);
     }
     const newSite = await this.sitesService.assignSite(body.origin, email);
-    const updateSite = await this.sitesService.updateSiteInfo(newSite, HOUR_MILLISEC, `./icons/${GREEN}.png`);
+    const updateSite = await this.sitesService.updateSiteInfo(newSite, `./icons/${GREEN}.png`, 1);
     return res.json(updateSite);
   }
 }
