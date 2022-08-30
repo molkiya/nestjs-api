@@ -5,11 +5,10 @@ import {Repository} from 'typeorm';
 import Redis from 'ioredis';
 import {SiteStatus} from '../../../utils/status.utils';
 import {SiteTitle} from '../../../utils/title.utils';
-import {InjectModel} from '@nestjs/mongoose';
-import {CachedSite, CachedSiteDocument} from '../../schemas/site.schema';
-import {Model} from 'mongoose';
 import SitesEntity from '../../entities/entities/sites.entity';
 import WhoisEntity from '../../entities/entities/whois.entity';
+import {Db} from 'mongodb';
+import {DAY_MILLISEC, MINUTE_MILLISEC} from '../../utils/enum.utils';
 
 @Injectable()
 export class ExtensionService {
@@ -20,7 +19,8 @@ export class ExtensionService {
     private whoisRepository: Repository<WhoisEntity>,
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,
-    @InjectModel(CachedSite.name) private readonly cachedSiteModel: Model<CachedSiteDocument>,
+    @Inject('MONGODB_CONNECTION')
+    private readonly mongodb: Db,
   ) {}
 
   public async getSite(origin: string) {
@@ -112,26 +112,31 @@ export class ExtensionService {
     };
   }
 
-  public async updateSiteCache(origin: string, assigned_by: number) {
-    const updatedSite = await this.cachedSiteModel.findOneAndUpdate(
-      {'site.fqdn': origin},
-      {
-        'site.assigned_by': assigned_by,
-      },
-      {new: true},
-    );
-
-    if (!updatedSite) {
-      return new HttpException('Update site cache failed', 500);
-    }
-    return updatedSite;
-  }
-
   public async updateSiteInfo(site: any, ttl: number, path: string, assigned_by = null) {
     site.site['ttl'] = ttl;
     site.site.path = path;
     site.site.assigned_by = assigned_by;
-    await this.cachedSiteModel.create(site);
+    await this.mongodb.collection('sites').insertOne(site);
     return site;
+  }
+
+  public async cacheSite(origin: string, site) {
+    const resultTtl = this.setTTL(site);
+    await this.redis.expire(origin, resultTtl);
+  }
+
+  private setTTL(site: any) {
+    switch (site.site.status) {
+      case 'NEW':
+        return (site.site.ttl = this.seconds_since_epoch(MINUTE_MILLISEC));
+      case 'SUP':
+        return (site.site.ttl = this.seconds_since_epoch(DAY_MILLISEC) * 30);
+      default:
+        return (site.site.ttl = this.seconds_since_epoch(MINUTE_MILLISEC));
+    }
+  }
+
+  private seconds_since_epoch(d): number {
+    return Math.floor(d / 1000);
   }
 }

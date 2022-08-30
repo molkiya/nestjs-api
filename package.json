@@ -32,7 +32,6 @@
     "@nestjs/core": "9.0.9",
     "@nestjs/mapped-types": "1.1.0",
     "@nestjs/microservices": "9.0.11",
-    "@nestjs/mongoose": "9.2.0",
     "@nestjs/platform-express": "9.0.9",
     "@nestjs/swagger": "6.0.5",
     "@nestjs/typeorm": "9.0.1",
@@ -43,7 +42,7 @@
     "fast-csv": "4.3.6",
     "google-auth-library": "8.1.1",
     "ioredis": "5.2.2",
-    "mongoose": "6.5.3",
+    "mongodb": "4.9.0",
     "pg": "8.7.3",
     "reflect-metadata": "0.1.13",
     "rimraf": "3.0.2",
@@ -73,7 +72,8 @@
     "ts-loader": "9.3.1",
     "ts-node": "10.9.1",
     "tsconfig-paths": "4.0.0",
-    "typescript": "4.7.4"
+    "typescript": "4.7.4",
+    "webpack": "^5.74.0"
   },
   "jest": {
     "moduleFileExtensions": [

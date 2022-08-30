@@ -1,50 +1,57 @@
 import {Body, Controller, Get, HttpException, Inject, Post, Query, Response} from '@nestjs/common';
-import {SECONDS_HOUR_MILLISEC} from '../../utils/enum.utils';
 import {GREEN} from '../../utils/icons.utils';
 import {ExtensionService} from '../service/extension.service';
 import {assignSiteDto} from '../../dto/getSite.dto';
-import {InjectModel} from '@nestjs/mongoose';
-import {CachedSite, CachedSiteDocument} from '../../schemas/site.schema';
-import {Model} from 'mongoose';
+import Redis from 'ioredis';
+import {HOUR_MILLISEC} from '../../utils/enum.utils';
 
 @Controller('ext')
 export class ExtensionController {
   constructor(
     @Inject(ExtensionService)
     private readonly sitesService: ExtensionService,
-    @InjectModel(CachedSite.name) private readonly cachedSiteModel: Model<CachedSiteDocument>,
+    @Inject('REDIS_CLIENT')
+    private readonly redis: Redis,
   ) {}
 
   @Get('')
   async getSite(@Query('origin') origin: string, @Response() res) {
-    const email = res.locals.email;
-    if (!email) {
+    if (!res.locals.email) {
       throw new HttpException('Bad Request / Invalid Token', 400);
     }
+
     if (
       !origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/) ||
       origin.length > 253
     ) {
-      console.log('bad');
       throw new HttpException('Bad Request', 400);
     }
 
-    const cachedSite = await this.cachedSiteModel.findOne({'site.fqdn': origin});
-    if (cachedSite) {
-      return res.json(cachedSite);
-    }
+    const redisResult = await this.redis.get(origin);
 
-    console.log(cachedSite);
+    if (redisResult) {
+      console.log('redisResult', redisResult);
+      const updated = await this.sitesService.updateSiteInfo(
+        JSON.parse(redisResult),
+        HOUR_MILLISEC,
+        `./icons/${GREEN}.png`,
+        1,
+      );
+      return res.json(updated);
+    }
 
     const site = await this.sitesService.getSite(origin);
 
     if (site) {
-      const updated = await this.sitesService.updateSiteInfo(site, SECONDS_HOUR_MILLISEC, `./icons/${GREEN}.png`, 1);
+      await this.redis.set(origin, JSON.stringify(site));
+      await this.sitesService.cacheSite(origin, site);
+      const updated = await this.sitesService.updateSiteInfo(site, HOUR_MILLISEC, `./icons/${GREEN}.png`, 1);
       return res.json(updated);
     }
 
-    const newSite = await this.sitesService.createSite(origin, email);
-    const updateSite = await this.sitesService.updateSiteInfo(newSite, SECONDS_HOUR_MILLISEC, `./icons/${GREEN}.png`);
+    const newSite = await this.sitesService.createSite(origin, res.locals.email);
+    await this.sitesService.cacheSite(origin, newSite);
+    const updateSite = await this.sitesService.updateSiteInfo(newSite, HOUR_MILLISEC, `./icons/${GREEN}.png`);
     return res.json(updateSite);
   }
 
@@ -61,8 +68,8 @@ export class ExtensionController {
     ) {
       throw new HttpException('Bad Request', 400);
     }
-    await this.sitesService.assignSite(body.origin, email);
-    const updatedSiteCached = await this.sitesService.updateSiteCache(body.origin, 1);
-    return res.json(updatedSiteCached);
+    const newSite = await this.sitesService.assignSite(body.origin, email);
+    const updateSite = await this.sitesService.updateSiteInfo(newSite, HOUR_MILLISEC, `./icons/${GREEN}.png`);
+    return res.json(updateSite);
   }
 }

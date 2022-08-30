@@ -1,3 +1,4 @@
-export const SECONDS_HOUR_MILLISEC = 60 * 1000;
-export const SECONDS_DAY = 60 * 60 * 24;
-export const SECONDS_WEEK = 60 * 60 * 24 * 7;
+export const MINUTE_MILLISEC = 60 * 1000;
+export const HOUR_MILLISEC = 60 * 60 * 1000;
+export const DAY_MILLISEC = 60 * 60 * 24 * 1000;
+export const WEEK_MILLISEC = 60 * 60 * 24 * 7 * 1000;
