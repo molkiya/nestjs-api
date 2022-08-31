@@ -14,9 +14,9 @@ import {FilesInterceptor} from '@nestjs/platform-express';
 import {ClientService} from '../service/client.service';
 import {ExtensionService} from '../../extension/service/extension.service';
 import {BodyDto} from '../../dto/body.dto';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
 import * as csv from 'fast-csv';
+import * as path from 'path';
 
 @Controller('client')
 export class ClientController {
@@ -29,7 +29,7 @@ export class ClientController {
 
   @Post('upload')
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FilesInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('files'))
   async uploadFiles(@UploadedFiles() files, @Response() res, @Body() body: BodyDto, @Query() query) {
     const accountId = res.locals.account;
     if (!accountId) {
@@ -45,7 +45,9 @@ export class ClientController {
         return res.json({message: `File is empty`});
       }
       const existSites = [];
-      fs.createReadStream(path.resolve(__dirname, '../../../..', 'uploads', `${files[0].filename}`))
+      const pathS = path.join(__dirname, '../../../..', 'uploads', `${files[0].filename}`);
+      console.log(pathS);
+      fs.createReadStream(pathS)
         .pipe(csv.parse())
         .on('error', (e) => {
           return res.json({message: `Something gone wrong: ${e.message}`});
@@ -57,23 +59,21 @@ export class ClientController {
           ) {
             throw new HttpException('Bad Request', 400);
           }
-          console.log(data);
           const site = await this.extensionService.getSite(data[0]);
-          if (site.rows[0].fqdn === new URL(data[0]).hostname) {
+          if (site.rows[0] && site.rows[0].fqdn === new URL(data[0]).hostname) {
             existSites.push(new URL(data[0]).hostname);
           } else {
-            console.log(query.suppress);
             await this.extensionService.createSite(data[0], accountId, query.suppress, query.cabinet);
           }
         })
-        .on('end', async (rowCount: number) => {
+        .end(async (existSites) => {
           await fs.rmSync(path.resolve(__dirname, '../../../..', 'uploads', `${files[0].filename}`));
-          console.log(`Parsed ${rowCount} rows`);
-          return {
+          console.log(existSites);
+          return res.json({
             existsSites: existSites,
             type: 'file',
-            message: `OK, parsed ${rowCount} rows`,
-          };
+            message: `OK, parsed`,
+          });
         });
     } else if (body.domains) {
       const existSites = [];
