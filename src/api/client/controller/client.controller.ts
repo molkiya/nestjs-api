@@ -84,7 +84,6 @@ export class ClientController {
         ) {
           throw new HttpException('Bad Request', 400);
         }
-        console.log(query.suppress);
         const site = await this.extensionService.getSite(domain);
         if (!site.rows.length) {
           await this.extensionService.createSite(domain, accountId, query.suppress, query.cabinet);

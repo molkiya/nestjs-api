@@ -71,6 +71,7 @@ export class ExtensionController {
     }
 
     const result = await this.sitesService.assignSite(body.origin, res.locals.account);
+    console.log(result);
     const updatedSiteCached = await this.sitesService.cacheSite(body.origin, result.rows[0]);
     await this.mongodb.collection('sites').insertOne({
       ...updatedSiteCached,

@@ -42,7 +42,7 @@ export class ExtensionService {
   }
 
   public async createSite(origin: string, accountId: number, suppress = false, cabinet = false) {
-    console.log(origin, accountId);
+    console.log('origin', origin, 'accountId', accountId);
     const url = new URL(origin);
     let https = false;
     if (url.protocol === 'https:') https = !https;
@@ -54,6 +54,7 @@ export class ExtensionService {
 
   public async cacheSite(origin: string, site: any) {
     const resultTtl = this.setTTL(site);
+    console.log(resultTtl);
     await this.redis.set(
       new URL(origin).hostname,
       JSON.stringify({
@@ -71,16 +72,7 @@ export class ExtensionService {
   }
 
   public setTTL(site: any) {
-    if (!site.site.suppress && !site.site.cabinet && !site.site.assigned_by) {
-      return {
-        status: StatusEnum.NEW,
-        ttl: MINUTE_MILLISEC,
-        title: TitleEnum.NEW,
-        path: `./icons/${PathEnum.GREEN}.png`,
-      };
-    }
-
-    if (site.site.suppress) {
+    if (site.suppress) {
       return {
         status: StatusEnum.SUP,
         ttl: DAY_MILLISEC * 30,
@@ -89,7 +81,7 @@ export class ExtensionService {
       };
     }
 
-    if (site.site.cabinet) {
+    if (site.cabinet) {
       return {
         status: StatusEnum.CAB,
         ttl: WEEK_MILLISEC,
@@ -98,12 +90,21 @@ export class ExtensionService {
       };
     }
 
-    if (site.site.assigned_by) {
+    if (site.assigned_by) {
       return {
         status: StatusEnum.WIP,
         ttl: WEEK_MILLISEC,
         title: TitleEnum.WIP,
         path: `./icons/${PathEnum.BROWN}.png`,
+      };
+    }
+
+    if (!site.suppress && !site.cabinet && !site.assigned_by) {
+      return {
+        status: StatusEnum.NEW,
+        ttl: MINUTE_MILLISEC,
+        title: TitleEnum.NEW,
+        path: `./icons/${PathEnum.GREEN}.png`,
       };
     }
 
