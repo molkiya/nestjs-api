@@ -62,6 +62,7 @@ export class ClientController {
           if (site.rows[0].fqdn === new URL(data[0]).hostname) {
             existSites.push(new URL(data[0]).hostname);
           } else {
+            console.log(query.suppress);
             await this.extensionService.createSite(data[0], accountId, query.suppress, query.cabinet);
           }
         })
@@ -83,6 +84,7 @@ export class ClientController {
         ) {
           throw new HttpException('Bad Request', 400);
         }
+        console.log(query.suppress);
         const site = await this.extensionService.getSite(domain);
         if (!site.rows.length) {
           await this.extensionService.createSite(domain, accountId, query.suppress, query.cabinet);

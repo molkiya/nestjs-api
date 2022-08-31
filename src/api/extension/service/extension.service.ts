@@ -47,7 +47,7 @@ export class ExtensionService {
     let https = false;
     if (url.protocol === 'https:') https = !https;
     await this.pg.query(
-      `INSERT INTO sites (fqdn, created_by, https, suppress, cabinet) VALUES ('${url.hostname}', ${accountId}, ${https}, suppress, cabinet)`,
+      `INSERT INTO sites (fqdn, created_by, https, suppress, cabinet) VALUES ('${url.hostname}', ${accountId}, ${https}, ${suppress}, ${cabinet})`,
     );
     return await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${url.hostname}'`);
   }
