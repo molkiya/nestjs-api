@@ -1,6 +1,6 @@
 import {
   Body,
-  Controller,
+  Controller, Headers,
   HttpException,
   Inject,
   Post,
@@ -17,6 +17,8 @@ import {BodyDto} from '../../dto/body.dto';
 import * as fs from 'fs';
 import * as csv from 'fast-csv';
 import * as path from 'path';
+import {getOauthClient} from "../../utils/oauthClient.utils";
+import {DOMAIN_LIST} from "../../utils/email.utils";
 
 @Controller('client')
 export class ClientController {
@@ -99,6 +101,42 @@ export class ClientController {
           message: 'OK',
         });
       });
+    }
+  }
+
+
+  @Post('reg')
+  async regUser(@Headers() headers, @Response() res) {
+
+    if (!headers.authorization) {
+      throw new HttpException('Unauthorized', 401)
+    }
+    let oAuthCode = headers.authorization
+    let tokens
+    let tokenCheck
+
+    try {
+      let token = await getOauthClient().getToken(oAuthCode);
+      tokens = token.tokens
+      tokenCheck = await getOauthClient().getTokenInfo(tokens.access_token)
+    } catch (err) {
+      throw new HttpException('Unauthorized', 401)
+    }
+
+    if (
+        tokenCheck.email_verified &&
+        DOMAIN_LIST.map((DOMAIN: string) => {
+          return tokenCheck.email.endsWith(DOMAIN);
+        }).includes(true)
+    ) {
+      return res
+          .json(
+              {
+                xAccessToken: tokens.access_token,
+                xRefreshToken: tokens.refresh_token
+              })
+    } else {
+      throw new HttpException('Unauthorized', 401);
     }
   }
 }
