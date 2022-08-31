@@ -41,13 +41,13 @@ export class ExtensionService {
     return await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${url.hostname}'`);
   }
 
-  public async createSite(origin: string, accountId: number) {
+  public async createSite(origin: string, accountId: number, suppress = false, cabinet = false) {
     console.log(origin, accountId);
     const url = new URL(origin);
     let https = false;
     if (url.protocol === 'https:') https = !https;
     await this.pg.query(
-      `INSERT INTO sites (fqdn, created_by, https, suppress, cabinet) VALUES ('${url.hostname}', ${accountId}, ${https}, false, false)`,
+      `INSERT INTO sites (fqdn, created_by, https, suppress, cabinet) VALUES ('${url.hostname}', ${accountId}, ${https}, suppress, cabinet)`,
     );
     return await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${url.hostname}'`);
   }

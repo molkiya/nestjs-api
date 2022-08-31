@@ -1,4 +1,14 @@
-import {Body, Controller, HttpException, Inject, Post, Response, UploadedFiles, UseInterceptors} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpException,
+  Inject,
+  Post,
+  Query,
+  Response,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import {ApiConsumes} from '@nestjs/swagger';
 import {FilesInterceptor} from '@nestjs/platform-express';
 import {ClientService} from '../service/client.service';
@@ -20,7 +30,7 @@ export class ClientController {
   @Post('upload')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('file'))
-  async uploadFiles(@UploadedFiles() files, @Response() res, @Body() body: BodyDto) {
+  async uploadFiles(@UploadedFiles() files, @Response() res, @Body() body: BodyDto, @Query() query) {
     const accountId = res.locals.account;
     if (!accountId) {
       throw new HttpException('Bad Request / Invalid Token', 400);
@@ -52,7 +62,7 @@ export class ClientController {
           if (site.rows[0].fqdn === new URL(data[0]).hostname) {
             existSites.push(new URL(data[0]).hostname);
           } else {
-            await this.extensionService.createSite(data[0], accountId);
+            await this.extensionService.createSite(data[0], accountId, query.suppress, query.cabinet);
           }
         })
         .on('end', async (rowCount: number) => {
@@ -75,7 +85,7 @@ export class ClientController {
         }
         const site = await this.extensionService.getSite(domain);
         if (!site.rows.length) {
-          await this.extensionService.createSite(domain, accountId);
+          await this.extensionService.createSite(domain, accountId, query.suppress, query.cabinet);
         } else {
           existSites.push(new URL(domain).hostname);
         }
