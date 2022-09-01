@@ -6,12 +6,13 @@ import {DAY_MILLISEC, MINUTE_MILLISEC, WEEK_MILLISEC} from '../../utils/enum.uti
 import StatusEnum from '../../utils/status.utils';
 import TitleEnum from '../../utils/title.utils';
 import PathEnum from '../../utils/icons.utils';
+import {PoolClient} from 'pg';
 
 @Injectable()
 export class ExtensionService {
   constructor(
     @Inject(PG_CONNECTION)
-    private readonly pg: any,
+    private readonly pg: PoolClient,
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,
     @Inject('MONGODB_CONNECTION')

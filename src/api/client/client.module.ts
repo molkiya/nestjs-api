@@ -6,8 +6,8 @@ import {MulterConfig} from '../../config/multer.config';
 import {PostgreSQLModule} from '../../config/database/postgresql.config';
 import {RedisModule} from '../../config/redis/redis.module';
 import {ExtensionModule} from '../extension/extension.module';
-import {CheckOauthMiddlewareClient} from './middleware/checkToken.middleware';
 import {MongoDBModule} from '../../config/database/mongodb.config';
+import {CheckOauthMiddleware} from '../middleware/checkOauth.middleware';
 
 @Module({
   imports: [
@@ -25,6 +25,6 @@ import {MongoDBModule} from '../../config/database/mongodb.config';
 })
 export class ClientModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CheckOauthMiddlewareClient).forRoutes({path: '/client/upload', method: RequestMethod.POST});
+    consumer.apply(CheckOauthMiddleware).forRoutes({path: 'client/upload', method: RequestMethod.POST});
   }
 }

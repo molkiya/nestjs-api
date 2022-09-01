@@ -1,17 +1,18 @@
 import {HttpException, Inject, Injectable, NestMiddleware} from '@nestjs/common';
 import {NextFunction, Request, Response} from 'express';
 import Redis from 'ioredis';
-import {getOauthClient} from '../../utils/oauthClient.utils';
-import {DOMAIN_LIST} from '../../utils/email.utils';
-import {PG_CONNECTION} from '../../utils/pgConnection';
+import {getOauthClient} from '../utils/oauthClient.utils';
+import {DOMAIN_LIST} from '../utils/email.utils';
+import {PG_CONNECTION} from '../utils/pgConnection';
+import {PoolClient} from 'pg';
 
 @Injectable()
-export class CheckOauthMiddlewareExtension implements NestMiddleware {
+export class CheckOauthMiddleware implements NestMiddleware {
   constructor(
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,
     @Inject(PG_CONNECTION)
-    private readonly pg: any,
+    private readonly pg: PoolClient,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
