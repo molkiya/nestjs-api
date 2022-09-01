@@ -7,7 +7,6 @@ import * as bodyParser from 'body-parser';
 import {pgInit} from './config/database/postgresql.config';
 
 async function bootstrap() {
-  const PORT: number = APP_PORT;
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api');
@@ -32,8 +31,8 @@ async function bootstrap() {
     await pgInit();
   }
 
-  await app.listen(PORT, () => {
-    console.log('Server starting at:', PORT);
+  await app.listen(APP_PORT, () => {
+    console.log('Server starting at:', APP_PORT);
   });
 }
 
