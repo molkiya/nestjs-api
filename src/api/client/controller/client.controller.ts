@@ -101,11 +101,4 @@ export class ClientController {
       });
     }
   }
-
-  @Post('reg')
-  async regUser(@Response() res) {
-    return res.json({
-      message: 'OK',
-    });
-  }
 }
