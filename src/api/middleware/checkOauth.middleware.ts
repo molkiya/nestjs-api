@@ -16,7 +16,7 @@ export class CheckOauthMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const oauthToken: string = this.oauth_token(req);
+    const oauthToken: string = this.oauthToken(req);
 
     const redisResult = await this.redis.get(oauthToken);
 
@@ -63,7 +63,6 @@ export class CheckOauthMiddleware implements NestMiddleware {
           ),
         );
         await this.redis.expire(oauthToken.toString(), time);
-        console.log(account.rows[0].account);
         res.locals.account = account.rows[0].account;
         next();
       } else {
@@ -76,7 +75,7 @@ export class CheckOauthMiddleware implements NestMiddleware {
     return Math.floor(d / 1000);
   }
 
-  private oauth_token(req): string {
+  private oauthToken(req): string {
     const oauthBearerToken = String(req.headers['authorization'] || '');
     if (!oauthBearerToken || !oauthBearerToken.startsWith('Bearer ')) {
       throw new HttpException('Unauthorized', 401);
