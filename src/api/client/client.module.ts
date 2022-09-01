@@ -25,6 +25,12 @@ import {CheckOauthMiddleware} from '../middleware/checkOauth.middleware';
 })
 export class ClientModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CheckOauthMiddleware).forRoutes({path: 'client/upload', method: RequestMethod.POST});
+    consumer.apply(CheckOauthMiddleware).forRoutes(
+      {
+        path: 'client/upload',
+        method: RequestMethod.POST,
+      },
+      {path: 'client/reg', method: RequestMethod.POST},
+    );
   }
 }

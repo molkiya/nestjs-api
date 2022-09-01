@@ -14,8 +14,12 @@ import {PostgreSQLModule} from '../../config/database/postgresql.config';
 })
 export class ExtensionModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(CheckOauthMiddleware)
-      .forRoutes({path: 'ext', method: RequestMethod.GET}, {path: 'ext/assign', method: RequestMethod.POST});
+    consumer.apply(CheckOauthMiddleware).forRoutes(
+      {path: 'ext', method: RequestMethod.GET},
+      {
+        path: 'ext/assign',
+        method: RequestMethod.POST,
+      },
+    );
   }
 }
