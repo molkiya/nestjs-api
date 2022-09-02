@@ -51,7 +51,7 @@ export class CheckOauthMiddleware implements NestMiddleware {
           account = await this.pg.query(`SELECT * FROM accounts WHERE email = '${newOauthToken.email}'`);
         }
 
-        const time = this.seconds_since_epoch(newOauthToken.expiry_date) - this.seconds_since_epoch(Date.now());
+        const time = Math.floor(newOauthToken.expiry_date / 1000) - Math.floor(Date.now() / 1000);
         await this.redis.set(
           oauthToken.toString(),
           Buffer.from(
@@ -68,10 +68,6 @@ export class CheckOauthMiddleware implements NestMiddleware {
         throw new HttpException('Unauthorized', 401);
       }
     }
-  }
-
-  private seconds_since_epoch(d): number {
-    return Math.floor(d / 1000);
   }
 
   private oauthToken(req): string {

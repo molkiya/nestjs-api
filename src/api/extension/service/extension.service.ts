@@ -116,8 +116,4 @@ export class ExtensionService {
       path: `./icons/${PathEnum.TRASH}.png`,
     };
   }
-
-  private seconds_since_epoch(d): number {
-    return Math.floor(d / 1000);
-  }
 }
