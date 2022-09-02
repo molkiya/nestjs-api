@@ -3,7 +3,7 @@ import {NextFunction, Request, Response} from 'express';
 import Redis from 'ioredis';
 import {getOauthClient} from '../utils/oauthClient.utils';
 import {DOMAIN_LIST} from '../utils/email.utils';
-import {PoolClient} from 'pg';
+import {PoolClient, QueryResult} from 'pg';
 
 @Injectable()
 export class CheckOauthMiddleware implements NestMiddleware {
@@ -16,8 +16,7 @@ export class CheckOauthMiddleware implements NestMiddleware {
 
   async use(req: Request, res: Response, next: NextFunction) {
     const oauthToken: string = this.oauthToken(req);
-
-    const redisResult = await this.redis.get(oauthToken);
+    const redisResult: string = await this.redis.get(oauthToken);
 
     console.log('token', {
       oauthToken,
@@ -44,14 +43,16 @@ export class CheckOauthMiddleware implements NestMiddleware {
           return newOauthToken.email.endsWith(DOMAIN);
         }).includes(true)
       ) {
-        let account = await this.pg.query(`SELECT * FROM accounts WHERE email = '${newOauthToken.email}'`);
+        let account: QueryResult<any> = await this.pg.query('SELECT * FROM accounts WHERE email = $1::text', [
+          newOauthToken.email,
+        ]);
 
         if (!account.rows[0]) {
-          await this.pg.query(`INSERT INTO accounts (email) VALUES ('${newOauthToken.email}');`);
-          account = await this.pg.query(`SELECT * FROM accounts WHERE email = '${newOauthToken.email}'`);
+          await this.pg.query('INSERT INTO accounts (email) VALUES ($1::text)', [newOauthToken.email]);
+          account = await this.pg.query('SELECT * FROM accounts WHERE email = $1::text', [newOauthToken.email]);
         }
 
-        const time = Math.floor(newOauthToken.expiry_date / 1000) - Math.floor(Date.now() / 1000);
+        const time: number = Math.floor(newOauthToken.expiry_date / 1000) - Math.floor(Date.now() / 1000);
         await this.redis.set(
           oauthToken.toString(),
           Buffer.from(

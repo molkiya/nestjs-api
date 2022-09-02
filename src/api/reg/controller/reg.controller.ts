@@ -1,13 +1,15 @@
-import {Controller, Post, Response} from '@nestjs/common';
+import {Controller, Inject, Post} from '@nestjs/common';
+import {RegService} from '../service/reg.service';
 
 @Controller('reg')
 export class RegController {
-  constructor() {}
+  constructor(
+    @Inject(RegService)
+    private readonly regService: RegService,
+  ) {}
 
   @Post('log')
-  async regUser(@Response() res) {
-    return res.json({
-      message: 'OK',
-    });
+  async regUser() {
+    return this.regService.loginService();
   }
 }

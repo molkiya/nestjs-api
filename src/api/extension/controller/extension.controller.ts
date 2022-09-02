@@ -26,7 +26,7 @@ export class ExtensionController {
       throw new HttpException('Bad Request', 400);
     }
 
-    const redisResult = await this.redis.get(new URL(origin).hostname);
+    const redisResult: string = await this.redis.get(new URL(origin).hostname);
 
     if (redisResult) {
       console.log('redisSite:    ', redisResult);

@@ -14,7 +14,7 @@ import {ClientService} from '../service/client.service';
 import {ExtensionService} from '../../extension/service/extension.service';
 import {BodyDto} from '../../dto/body.dto';
 import * as fs from 'fs';
-import * as csv from 'fast-csv';
+import * as es from 'event-stream';
 import * as path from 'path';
 
 @Controller('client')
@@ -43,60 +43,127 @@ export class ClientController {
         return res.json({message: `File is empty`});
       }
       const existSites = [];
-      const pathS = path.join(__dirname, '../../../..', 'uploads', `${files[0].filename}`);
-      console.log(pathS);
-      fs.createReadStream(pathS)
-        .pipe(csv.parse())
-        .on('error', (e) => {
-          return res.json({message: `Something gone wrong: ${e.message}`});
-        })
-        .on('data', async (data) => {
-          if (
-            !data[0].match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/) ||
-            data[0].length > 253
-          ) {
-            throw new HttpException('Bad Request', 400);
-          }
-          const site = await this.extensionService.getSite(data[0]);
-          if (site.rows[0] && site.rows[0].fqdn === new URL(data[0]).hostname) {
-            existSites.push(new URL(data[0]).hostname);
-          } else {
-            await this.extensionService.createSite(data[0], accountId, query.suppress, query.cabinet);
-          }
-        })
-        .end(async (existSites) => {
+      const badSites = [];
+      const goodSites = [];
+      let lineNr = 0;
+      const s = fs
+        .createReadStream(path.join(__dirname, '../../../..', 'uploads', `${files[0].filename}`))
+        .pipe(es.split())
+        .pipe(
+          es.mapSync(async (domain) => {
+            s.pause();
+            lineNr += 1;
+            console.log(domain);
+            if (domain.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/)) {
+              // console.log(`line: ${lineNr}, data: ${data}, time: ${new Date().toLocaleString('ru-RU')}`);
+              const site = await this.extensionService.getSite(domain);
+              if (site.rows[0] && site.rows[0].fqdn === new URL(domain).hostname) {
+                existSites.push({
+                  numberOfString: lineNr,
+                  origin: domain,
+                });
+              } else {
+                // console.log(`line: ${lineNr}, data: ${data}, time: ${new Date().toLocaleString('ru-RU')}`);
+                await this.extensionService.createSite(domain, accountId, query.suppress, query.cabinet);
+                goodSites.push({
+                  numberOfString: lineNr,
+                  origin: domain,
+                });
+              }
+              s.resume();
+            } else {
+              // console.log(`line: ${lineNr}, data: ${domain}, time: ${new Date().toLocaleString('ru-RU')}`);
+              badSites.push({
+                numberOfString: lineNr,
+                origin: domain,
+              });
+              s.resume();
+            }
+          }),
+        )
+        .on('end', async () => {
           await fs.rmSync(path.resolve(__dirname, '../../../..', 'uploads', `${files[0].filename}`));
-          console.log(existSites);
           return res.json({
-            existsSites: existSites,
+            existsSites: {
+              existSitesList: existSites,
+              existSitesCount: existSites.length,
+            },
+            badSites: {
+              badSitesList: badSites,
+              badSitesCount: badSites.length,
+            },
+            goodSites: {
+              goodSitesList: goodSites,
+              goodSitesCount: goodSites.length,
+            },
             type: 'file',
             message: `OK, parsed`,
           });
         });
-    } else if (body.domains) {
+    }
+    if (body.domains) {
       const existSites = [];
+      const badSites = [];
+      const goodSites = [];
+      let lineNr = 0;
       const result = body.domains.map(async (domain) => {
-        if (
-          !domain.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/) ||
-          domain.length > 253
-        ) {
-          throw new HttpException('Bad Request', 400);
-        }
-        const site = await this.extensionService.getSite(domain);
-        if (!site.rows.length) {
-          await this.extensionService.createSite(domain, accountId, query.suppress, query.cabinet);
+        lineNr += 1;
+        if (domain.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/)) {
+          const site = await this.extensionService.getSite(domain);
+
+          if (site.rows[0] && site.rows[0].fqdn === new URL(domain).hostname) {
+            // console.log(`line: ${lineNr}, data: ${domain}, time: ${new Date().toLocaleString('ru-RU')}`);
+            existSites.push({
+              numberOfString: lineNr,
+              origin: domain,
+            });
+          } else {
+            await this.extensionService.createSite(domain, accountId, query.suppress, query.cabinet);
+            // console.log(`line: ${lineNr}, data: ${domain}, time: ${new Date().toLocaleString('ru-RU')}`);
+            goodSites.push({
+              numberOfString: lineNr,
+              origin: domain,
+            });
+          }
         } else {
-          existSites.push(new URL(domain).hostname);
+          // console.log(`line: ${lineNr}, data: ${domain}, time: ${new Date().toLocaleString('ru-RU')}`);
+          badSites.push({
+            numberOfString: lineNr,
+            origin: domain,
+          });
         }
       });
       Promise.all(result).then(() => {
         if (!result) throw new HttpException('Server Error', 500);
         return res.json({
-          existSites,
+          existsSites: {
+            existSitesList: existSites,
+            existSitesCount: existSites.length,
+          },
+          badSites: {
+            badSitesList: badSites,
+            badSitesCount: badSites.length,
+          },
+          goodSites: {
+            goodSitesList: goodSites,
+            goodSitesCount: goodSites.length,
+          },
           type: 'array',
           message: 'OK',
         });
       });
+    }
+  }
+
+  private parseDomain(value) {
+    try {
+      if (value.startsWith('http://') || value.startsWith('https://')) {
+        return new URL(String(value).toLowerCase().trim()).hostname;
+      } else {
+        return new URL(`http://${String(value).toLowerCase().trim()}`).hostname;
+      }
+    } catch (e) {
+      return null;
     }
   }
 }
