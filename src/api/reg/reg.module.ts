@@ -12,6 +12,9 @@ import {PostgreSQLModule} from '../../config/database/postgresql.config';
 })
 export class RegModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(CheckOauthMiddleware).forRoutes({path: 'reg/log', method: RequestMethod.POST});
+    consumer.apply(CheckOauthMiddleware).forRoutes({
+      path: 'reg/log',
+      method: RequestMethod.POST,
+    });
   }
 }

@@ -65,7 +65,7 @@ export class ExtensionService {
         },
       }),
     );
-    await this.redis.expire(new URL(origin).hostname, this.seconds_since_epoch(resultTtl.ttl));
+    await this.redis.expire(new URL(origin).hostname, Math.floor(resultTtl.ttl / 1000));
     return {
       ...site,
       ...resultTtl,

@@ -30,7 +30,10 @@ export class ClientModule {
         path: 'client/upload',
         method: RequestMethod.POST,
       },
-      {path: 'client/reg', method: RequestMethod.POST},
+      {
+        path: 'client/reg',
+        method: RequestMethod.POST,
+      },
     );
   }
 }

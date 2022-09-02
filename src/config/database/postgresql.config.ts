@@ -8,10 +8,9 @@ import {
 import {Pool} from 'pg';
 import {Module} from '@nestjs/common';
 import {PG_CONNECTION} from '../../api/utils/pgConnection';
-import * as fs from 'fs';
 
 const dbProvider = {
-  provide: PG_CONNECTION,
+  provide: 'PG_CONNECTION',
   useValue: new Pool({
     user: POSTGRESQL_DB_USERNAME,
     host: POSTGRESQL_DB_HOST,
@@ -19,23 +18,6 @@ const dbProvider = {
     password: POSTGRESQL_DB_PASSWORD,
     port: POSTGRESQL_DB_PORT,
   }),
-};
-
-export const pgInit = async () => {
-  const pool = new Pool({
-    user: POSTGRESQL_DB_USERNAME,
-    host: POSTGRESQL_DB_HOST,
-    database: POSTGRESQL_DB_NAME,
-    password: POSTGRESQL_DB_PASSWORD,
-    port: POSTGRESQL_DB_PORT,
-  });
-
-  const sites = fs.readFileSync('src/shared/ddl/sites.ddl').toString();
-  await pool.query(sites);
-  console.log(sites);
-  const accounts = fs.readFileSync('src/shared/ddl/accounts.ddl').toString();
-  await pool.query(accounts);
-  console.log(accounts);
 };
 
 @Module({

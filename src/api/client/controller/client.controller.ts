@@ -9,7 +9,6 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import {ApiConsumes} from '@nestjs/swagger';
 import {FilesInterceptor} from '@nestjs/platform-express';
 import {ClientService} from '../service/client.service';
 import {ExtensionService} from '../../extension/service/extension.service';
@@ -28,7 +27,6 @@ export class ClientController {
   ) {}
 
   @Post('upload')
-  @ApiConsumes('multipart/form-data')
   @UseInterceptors(FilesInterceptor('files'))
   async uploadFiles(@UploadedFiles() files, @Response() res, @Body() body: BodyDto, @Query() query) {
     const accountId = res.locals.account;
