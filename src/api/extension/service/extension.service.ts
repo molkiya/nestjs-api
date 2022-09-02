@@ -20,12 +20,12 @@ export class ExtensionService {
   ) {}
 
   public async getSite(origin: string) {
-    return await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${new URL(origin).hostname}'`);
+    return await this.pg.query('SELECT * FROM sites WHERE fqdn = $1::text', [new URL(origin).hostname]);
   }
 
   public async assignSite(origin: string, accountId: number) {
     const url = new URL(origin);
-    const site = await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${url.hostname}'`);
+    const site = await this.pg.query('SELECT * FROM sites WHERE fqdn = $1::text', [url.hostname]);
 
     if (!site.rows[0]) {
       throw new HttpException('Site not exist', 401);
@@ -35,11 +35,12 @@ export class ExtensionService {
       throw new HttpException('Site already assigned', 406);
     }
 
-    await this.pg.query(
-      `UPDATE sites SET assigned_by = ${accountId}, assigned_at = NOW() WHERE fqdn = '${url.hostname}'`,
-    );
+    await this.pg.query('UPDATE sites SET assigned_by = $1::integer, assigned_at = NOW() WHERE fqdn = $2::text', [
+      accountId,
+      url.hostname,
+    ]);
 
-    return await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${url.hostname}'`);
+    return await this.pg.query('SELECT * FROM sites WHERE fqdn = $1::text', [url.hostname]);
   }
 
   public async createSite(origin: string, accountId: number, suppress = false, cabinet = false) {
@@ -48,9 +49,10 @@ export class ExtensionService {
     let https = false;
     if (url.protocol === 'https:') https = !https;
     await this.pg.query(
-      `INSERT INTO sites (fqdn, created_by, https, suppress, cabinet) VALUES ('${url.hostname}', ${accountId}, ${https}, ${suppress}, ${cabinet})`,
+      'INSERT INTO sites (fqdn, created_by, https, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean, $5::boolean)',
+      [url.hostname, accountId, https, suppress, cabinet],
     );
-    return await this.pg.query(`SELECT * FROM sites WHERE fqdn = '${url.hostname}'`);
+    return await this.pg.query('SELECT * FROM sites WHERE fqdn = $1::text', [url.hostname]);
   }
 
   public async cacheSite(origin: string, site: any) {
