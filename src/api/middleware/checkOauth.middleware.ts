@@ -44,11 +44,11 @@ export class CheckOauthMiddleware implements NestMiddleware {
           return newOauthToken.email.endsWith(DOMAIN);
         }).includes(true)
       ) {
-        let account = await this.pg.query(`SELECT * FROM accounts WHERE email = '${newOauthToken.email}'`);
+        let account = await this.pg.query('SELECT * FROM accounts WHERE email = $1::text', [newOauthToken.email]);
 
         if (!account.rows[0]) {
-          await this.pg.query(`INSERT INTO accounts (email) VALUES ('${newOauthToken.email}');`);
-          account = await this.pg.query(`SELECT * FROM accounts WHERE email = '${newOauthToken.email}'`);
+          await this.pg.query('INSERT INTO accounts (email) VALUES ($1::text)', [newOauthToken.email]);
+          account = await this.pg.query('SELECT * FROM accounts WHERE email = $1::text', [newOauthToken.email]);
         }
 
         const time = Math.floor(newOauthToken.expiry_date / 1000) - Math.floor(Date.now() / 1000);
