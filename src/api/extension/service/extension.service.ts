@@ -11,7 +11,7 @@ import {PoolClient} from 'pg';
 @Injectable()
 export class ExtensionService {
   constructor(
-    @Inject(PG_CONNECTION)
+    @Inject('PG_CONNECTION')
     private readonly pg: PoolClient,
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,

@@ -8,8 +8,5 @@ import {RegModule} from './reg/reg.module';
 
 @Module({
   imports: [ExtensionModule, RedisModule, PostgreSQLModule, MongoDBModule, ClientModule, RegModule],
-  controllers: [],
-  providers: [],
-  exports: [],
 })
 export class ApiModule {}
