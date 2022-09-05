@@ -16,7 +16,6 @@ import {BodyDto} from '../../dto/body.dto';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as es from 'event-stream';
-import {PoolClient} from 'pg';
 
 @Controller('client')
 export class ClientController {
@@ -25,8 +24,6 @@ export class ClientController {
     private readonly clientService: ClientService,
     @Inject(ExtensionService)
     private readonly extensionService: ExtensionService,
-    @Inject('PG_CONNECTION')
-    private readonly pg: PoolClient,
   ) {}
 
   @Post('upload')
@@ -58,17 +55,14 @@ export class ClientController {
             lineNr += 1;
             const hostname = this.parseDomain(line);
             if (hostname) {
-              const site = await this.pg.query('SELECT * FROM sites WHERE fqdn = $1::text', [hostname]);
+              const site = await this.clientService.getSiteInfo(hostname);
               if (site.rows[0] && site.rows[0].fqdn === hostname) {
                 existSites.push({
                   numberOfString: lineNr,
                   origin: line,
                 });
               } else {
-                await this.pg.query(
-                  'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
-                  [hostname, accountId, query.suppress, query.cabinet],
-                );
+                await this.clientService.createSiteInfo(hostname, accountId, query.suppress, query.cabinet);
                 goodSites.push({
                   numberOfString: lineNr,
                   origin: line,
@@ -113,17 +107,14 @@ export class ClientController {
         lineNr += 1;
         const hostname = this.parseDomain(domain);
         if (hostname) {
-          const site = await this.pg.query('SELECT * FROM sites WHERE fqdn = $1::text', [hostname]);
+          const site = await this.clientService.getSiteInfo(hostname);
           if (site.rows[0] && site.rows[0].fqdn === hostname) {
             existSites.push({
               numberOfString: lineNr,
               origin: domain,
             });
           } else {
-            await this.pg.query(
-              'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
-              [hostname, accountId, query.suppress, query.cabinet],
-            );
+            await this.clientService.createSiteInfo(hostname, accountId, query.suppress, query.cabinet);
             goodSites.push({
               numberOfString: lineNr,
               origin: domain,
