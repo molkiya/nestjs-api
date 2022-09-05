@@ -55,7 +55,7 @@ export class ClientController {
             lineNr += 1;
             // console.log(domain);
             const origin = this.parseDomain(domain);
-            if (origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/)) {
+            if (origin) {
               // console.log(`line: ${lineNr}, data: ${data}, time: ${new Date().toLocaleString('ru-RU')}`);
               const site = await this.extensionService.getSite(origin);
               if (site.rows[0] && site.rows[0].fqdn === new URL(origin).hostname) {
@@ -110,7 +110,7 @@ export class ClientController {
       const result = body.domains.map(async (domain) => {
         lineNr += 1;
         const origin = this.parseDomain(domain);
-        if (origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/)) {
+        if (origin) {
           const site = await this.extensionService.getSite(origin);
 
           if (site.rows[0] && site.rows[0].fqdn === new URL(origin).hostname) {
@@ -159,11 +159,11 @@ export class ClientController {
 
   private parseDomain(value) {
     try {
-      if (value.startsWith('http://') || value.startsWith('https://')) {
-        return new URL(String(value).toLowerCase().trim()).origin;
-      } else {
+      // if (value.startsWith('http://') || value.startsWith('https://')) {
+      //   return new URL(String(value).toLowerCase().trim()).origin;
+      // } else {
         return new URL(`http://${String(value).toLowerCase().trim()}`).origin;
-      }
+      // }
     } catch (e) {
       return '';
     }
