@@ -36,17 +36,22 @@ export class ClientController {
     }
 
     if (files) {
-      const result = this.clientService.uploadFromFile(files, res.locals.accountId, query.suppress, query.cabinet);
-      res.json(result);
+      const result = await this.clientService.uploadFromFile(
+        files,
+        res.locals.accountId,
+        query.suppress,
+        query.cabinet,
+      );
+      return res.json(result);
     }
     if (body.domains) {
-      const result = this.clientService.uploadFromBody(
+      const result = await this.clientService.uploadFromBody(
         body.domains,
         res.locals.accountId,
         query.suppress,
         query.cabinet,
       );
-      res.json(result);
+      return res.json(result);
     }
   }
 }

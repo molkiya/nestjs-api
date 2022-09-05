@@ -1,7 +1,7 @@
 import {HttpException, Inject} from '@nestjs/common';
 import Redis from 'ioredis';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as es from 'event-stream';
 import {PoolClient} from 'pg';
 
