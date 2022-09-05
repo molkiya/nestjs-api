@@ -13,8 +13,8 @@ import {FilesInterceptor} from '@nestjs/platform-express';
 import {ClientService} from '../service/client.service';
 import {ExtensionService} from '../../extension/service/extension.service';
 import {BodyDto} from '../../dto/body.dto';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as es from 'event-stream';
 import {PoolClient} from 'pg';
 
