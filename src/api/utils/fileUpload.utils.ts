@@ -5,7 +5,7 @@ export const filename = (req, file, callback) => {
 
 export const fileFilter = (req, file, callback) => {
   if (file) {
-    if (!file.originalname.endsWith('.csv') && !file.originalname.endsWith('.tt')) {
+    if (!file.originalname.endsWith('.csv') && !file.originalname.endsWith('.txt')) {
       return callback(new Error('Wrong extension of file'), false);
     }
   }

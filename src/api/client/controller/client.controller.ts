@@ -53,9 +53,9 @@ export class ClientController {
           es.mapSync(async (domain) => {
             s.pause();
             lineNr += 1;
-            console.log(domain);
+            // console.log(domain);
             const origin = this.parseDomain(domain);
-            if (origin) {
+            if (origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/)) {
               // console.log(`line: ${lineNr}, data: ${data}, time: ${new Date().toLocaleString('ru-RU')}`);
               const site = await this.extensionService.getSite(origin);
               if (site.rows[0] && site.rows[0].fqdn === new URL(origin).hostname) {
@@ -110,7 +110,7 @@ export class ClientController {
       const result = body.domains.map(async (domain) => {
         lineNr += 1;
         const origin = this.parseDomain(domain);
-        if (origin) {
+        if (origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/)) {
           const site = await this.extensionService.getSite(origin);
 
           if (site.rows[0] && site.rows[0].fqdn === new URL(origin).hostname) {
@@ -165,7 +165,7 @@ export class ClientController {
         return new URL(`http://${String(value).toLowerCase().trim()}`).origin;
       }
     } catch (e) {
-      return null;
+      return '';
     }
   }
 }
