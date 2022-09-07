@@ -13,7 +13,7 @@ export class ClientService {
     private readonly pg: PoolClient,
   ) {}
 
-  public async uploadFromFile(files, accountId, suppress, cabinet) {
+  public async uploadFromFile(files, accountId, suppress = false, cabinet = false) {
     if (!files.length) {
       return {message: `File is empty`};
     }
@@ -77,7 +77,7 @@ export class ClientService {
       });
   }
 
-  public async uploadFromBody(domainList, accountId, suppress, cabinet) {
+  public async uploadFromBody(domainList, accountId, suppress = false, cabinet = false) {
     const existSites = [];
     const badSites = [];
     const goodSites = [];
