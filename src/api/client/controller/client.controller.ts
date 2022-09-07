@@ -14,8 +14,8 @@ import {ClientService} from '../service/client.service';
 import {ExtensionService} from '../../extension/service/extension.service';
 import {BodyDto} from '../../dto/body.dto';
 import * as fs from 'fs';
-import * as es from 'event-stream';
 import * as path from 'path';
+import * as es from 'event-stream';
 
 @Controller('client')
 export class ClientController {
@@ -40,7 +40,7 @@ export class ClientController {
 
     if (files) {
       if (!files.length) {
-        return res.json({message: `File is empty`});
+        return {message: `File is empty`};
       }
       const existSites = [];
       const badSites = [];
@@ -50,33 +50,29 @@ export class ClientController {
         .createReadStream(path.join(__dirname, '../../../..', 'uploads', `${files[0].filename}`))
         .pipe(es.split())
         .pipe(
-          es.mapSync(async (domain) => {
+          es.mapSync(async (line) => {
             s.pause();
             lineNr += 1;
-            // console.log(domain);
-            const origin = this.parseDomain(domain);
-            if (origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/)) {
-              // console.log(`line: ${lineNr}, data: ${data}, time: ${new Date().toLocaleString('ru-RU')}`);
-              const site = await this.extensionService.getSite(origin);
-              if (site.rows[0] && site.rows[0].fqdn === new URL(origin).hostname) {
+            const hostname = this.parseDomain(line);
+            if (hostname) {
+              const site = await this.clientService.getSiteInfo(hostname);
+              if (site.rows[0] && site.rows[0].fqdn === hostname) {
                 existSites.push({
                   numberOfString: lineNr,
-                  origin: domain,
+                  origin: line,
                 });
               } else {
-                // console.log(`line: ${lineNr}, data: ${data}, time: ${new Date().toLocaleString('ru-RU')}`);
-                await this.extensionService.createSite(origin, accountId, query.suppress, query.cabinet);
+                await this.clientService.createSiteInfo(hostname, accountId, query.suppress, query.cabinet);
                 goodSites.push({
                   numberOfString: lineNr,
-                  origin: domain,
+                  origin: line,
                 });
               }
               s.resume();
             } else {
-              // console.log(`line: ${lineNr}, data: ${domain}, time: ${new Date().toLocaleString('ru-RU')}`);
               badSites.push({
                 numberOfString: lineNr,
-                origin: domain,
+                origin: line,
               });
               s.resume();
             }
@@ -109,26 +105,22 @@ export class ClientController {
       let lineNr = 0;
       const result = body.domains.map(async (domain) => {
         lineNr += 1;
-        const origin = this.parseDomain(domain);
-        if (origin.match(/^(http(s)?:\/\/)[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/)) {
-          const site = await this.extensionService.getSite(origin);
-
-          if (site.rows[0] && site.rows[0].fqdn === new URL(origin).hostname) {
-            // console.log(`line: ${lineNr}, data: ${domain}, time: ${new Date().toLocaleString('ru-RU')}`);
+        const hostname = this.parseDomain(domain);
+        if (hostname) {
+          const site = await this.clientService.getSiteInfo(hostname);
+          if (site.rows[0] && site.rows[0].fqdn === hostname) {
             existSites.push({
               numberOfString: lineNr,
               origin: domain,
             });
           } else {
-            await this.extensionService.createSite(origin, accountId, query.suppress, query.cabinet);
-            // console.log(`line: ${lineNr}, data: ${domain}, time: ${new Date().toLocaleString('ru-RU')}`);
+            await this.clientService.createSiteInfo(hostname, accountId, query.suppress, query.cabinet);
             goodSites.push({
               numberOfString: lineNr,
               origin: domain,
             });
           }
         } else {
-          // console.log(`line: ${lineNr}, data: ${domain}, time: ${new Date().toLocaleString('ru-RU')}`);
           badSites.push({
             numberOfString: lineNr,
             origin: domain,
@@ -159,11 +151,7 @@ export class ClientController {
 
   private parseDomain(value) {
     try {
-      if (value.startsWith('http://') || value.startsWith('https://')) {
-        return new URL(String(value).toLowerCase().trim()).origin;
-      } else {
-        return new URL(`http://${String(value).toLowerCase().trim()}`).origin;
-      }
+      return new URL(`https://${String(value).toLowerCase().trim()}`).hostname;
     } catch (e) {
       return '';
     }
