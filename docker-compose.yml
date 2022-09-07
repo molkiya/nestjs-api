@@ -82,9 +82,26 @@ services:
       - redis:/data
     networks:
       - default
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: dev_rabbitmq
+    restart: "always"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq/
+      - rabbitmq_log:/var/log/rabbitmq/
+    networks:
+      - default
+    environment:
+      - RABBITMQ_DEFAULT_PASS=password
+      - RABBITMQ_DEFAULT_USER=user
 networks:
   default:
 
 volumes:
   postgres:
   redis:
+  rabbitmq_data:
+  rabbitmq_log:
