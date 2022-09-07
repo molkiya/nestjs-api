@@ -33,6 +33,7 @@
     "@nestjs/mapped-types": "1.1.0",
     "@nestjs/platform-express": "9.0.9",
     "@redis/client": "1.2.0",
+    "bluebird": "3.7.2",
     "body-parser": "1.20.0",
     "event-stream": "4.0.1",
     "fast-csv": "4.3.6",
@@ -49,6 +50,7 @@
   "devDependencies": {
     "@nestjs/cli": "9.0.0",
     "@nestjs/schematics": "9.0.1",
+    "@types/event-stream": "4.0.0",
     "@types/express": "4.17.13",
     "@types/multer": "1.4.7",
     "@types/node": "16.11.47",
