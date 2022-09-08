@@ -8,7 +8,6 @@ import {RedisModule} from '../../config/redis/redis.module';
 import {ExtensionModule} from '../extension/extension.module';
 import {MongoDBModule} from '../../config/database/mongodb.config';
 import {CheckOauthMiddleware} from '../middleware/checkOauth.middleware';
-import {PslQueueModule} from '../../config/rabbitmq/psl-queue.config';
 
 @Module({
   imports: [
@@ -19,7 +18,6 @@ import {PslQueueModule} from '../../config/rabbitmq/psl-queue.config';
     RedisModule,
     ExtensionModule,
     MongoDBModule,
-    PslQueueModule,
   ],
   providers: [ClientService],
   controllers: [ClientController],
