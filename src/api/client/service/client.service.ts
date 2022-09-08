@@ -45,9 +45,9 @@ export class ClientService {
                   'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
                   [hostname, accountId, suppress, cabinet],
                 );
-                this.pslConnection.send(
+                await this.pslConnection.send(
                   {
-                    cmd: 'add-subscriber',
+                    cmd: 'add-psl',
                   },
                   hostname,
                 );
@@ -115,6 +115,12 @@ export class ClientService {
             await this.pg.query(
               'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
               [hostname, accountId, suppress, cabinet],
+            );
+            await this.pslConnection.send(
+              {
+                cmd: 'add-psl',
+              },
+              hostname,
             );
             goodSites.push({
               numberOfString: lineNr,

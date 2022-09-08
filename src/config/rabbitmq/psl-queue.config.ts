@@ -21,4 +21,4 @@ import {RABBITMQ_ADDRESS} from '../app/app.config';
   ],
   exports: ['PSL_QUEUE'],
 })
-export class PslQueueConfig {}
+export class PslQueueModule {}
