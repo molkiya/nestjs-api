@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as es from 'event-stream';
 import {PoolClient} from 'pg';
 import * as fs from 'fs';
+import {ClientProxy} from '@nestjs/microservices';
 
 export class ClientService {
   constructor(
@@ -11,6 +12,8 @@ export class ClientService {
     private readonly redis: Redis,
     @Inject('PG_CONNECTION')
     private readonly pg: PoolClient,
+    @Inject('PSL_QUEUE')
+    private readonly pslConnection: ClientProxy,
   ) {}
 
   public async fileHandler(files, accountId, suppress, cabinet) {
@@ -41,6 +44,12 @@ export class ClientService {
                 await this.pg.query(
                   'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
                   [hostname, accountId, suppress, cabinet],
+                );
+                this.pslConnection.send(
+                  {
+                    cmd: 'add-subscriber',
+                  },
+                  hostname,
                 );
                 goodSites.push({
                   numberOfString: lineNr,
