@@ -1,21 +1,25 @@
-import {Inject} from '@nestjs/common';
+import {Inject, Injectable} from '@nestjs/common';
 import Redis from 'ioredis';
 import * as path from 'path';
 import * as es from 'event-stream';
 import {PoolClient} from 'pg';
 import * as fs from 'fs';
-import {ClientProxy} from '@nestjs/microservices';
+import {AmqpConnection, RabbitSubscribe} from '@golevelup/nestjs-rabbitmq';
 
+@Injectable()
 export class ClientService {
   constructor(
     @Inject('REDIS_CLIENT')
     private readonly redis: Redis,
     @Inject('PG_CONNECTION')
     private readonly pg: PoolClient,
-    @Inject('PSL_QUEUE')
-    private readonly pslConnection: ClientProxy,
+    private queue: AmqpConnection,
   ) {}
 
+  @RabbitSubscribe({
+    exchange: 'exchange1',
+    queue: 'psl',
+  })
   public async fileHandler(files, accountId, suppress, cabinet) {
     return new Promise((resolve, reject) => {
       if (!files.length) {
@@ -45,12 +49,9 @@ export class ClientService {
                   'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
                   [hostname, accountId, suppress, cabinet],
                 );
-                await this.pslConnection.send(
-                  {
-                    cmd: 'add-psl',
-                  },
-                  hostname,
-                );
+                await this.queue.publish('', '', hostname, {
+                  noAck: false,
+                });
                 goodSites.push({
                   numberOfString: lineNr,
                   origin: line,
@@ -92,6 +93,10 @@ export class ClientService {
     return await this.fileHandler(files, accountId, suppress, cabinet);
   }
 
+  @RabbitSubscribe({
+    exchange: 'exchange1',
+    queue: 'psl',
+  })
   public async uploadFromBody(domainList, accountId, suppress = false, cabinet = false) {
     if (!domainList.length) {
       return {message: `File is empty`};
@@ -116,12 +121,9 @@ export class ClientService {
               'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
               [hostname, accountId, suppress, cabinet],
             );
-            await this.pslConnection.send(
-              {
-                cmd: 'add-psl',
-              },
-              hostname,
-            );
+            await this.queue.publish('', '', hostname, {
+              noAck: false,
+            });
             goodSites.push({
               numberOfString: lineNr,
               origin: domain,

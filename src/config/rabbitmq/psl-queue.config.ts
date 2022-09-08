@@ -1,24 +1,25 @@
 import {Module} from '@nestjs/common';
-import {ClientProxyFactory, Transport} from '@nestjs/microservices';
 import {RABBITMQ_ADDRESS} from '../app/app.config';
+import {RabbitMQModule} from '@golevelup/nestjs-rabbitmq';
 
 @Module({
-  providers: [
-    {
-      provide: 'PSL_QUEUE',
-      useValue: ClientProxyFactory.create({
-        transport: Transport.RMQ,
-        options: {
-          urls: [RABBITMQ_ADDRESS],
-          queue: 'psl',
-          noAck: false,
-          queueOptions: {
-            durable: true,
-          },
+  imports: [
+    RabbitMQModule.forRoot(RabbitMQModule, {
+      exchanges: [
+        {
+          name: 'exchange1',
+          type: 'topic',
         },
-      }),
-    },
+      ],
+      uri: RABBITMQ_ADDRESS,
+      channels: {
+        'channel-psl': {
+          prefetchCount: 15,
+          default: true,
+        },
+      },
+    }),
+    PslQueueModule,
   ],
-  exports: ['PSL_QUEUE'],
 })
 export class PslQueueModule {}
