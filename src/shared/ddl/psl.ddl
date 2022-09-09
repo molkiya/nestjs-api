@@ -1,4 +1,4 @@
-CREATE TABLE psl
+CREATE TABLE IF NOT EXISTS psl
 (
     site    INT NOT NULL
         CONSTRAINT psl_pk

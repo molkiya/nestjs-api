@@ -6,6 +6,7 @@ import StatusEnum from '../../utils/status.utils';
 import TitleEnum from '../../utils/title.utils';
 import PathEnum from '../../utils/icons.utils';
 import {PoolClient} from 'pg';
+import {publishToQueue} from '../../utils/rabbitmq-channel.utils';
 
 @Injectable()
 export class ExtensionService {
@@ -48,6 +49,7 @@ export class ExtensionService {
       'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
       [url.hostname, accountId, suppress, cabinet],
     );
+    await publishToQueue('psl', Buffer.from(url.hostname));
     return await this.pg.query('SELECT * FROM sites WHERE fqdn = $1::text', [url.hostname]);
   }
 
