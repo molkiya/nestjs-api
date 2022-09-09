@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as es from 'event-stream';
 import {PoolClient} from 'pg';
 import * as fs from 'fs';
+import {publishToQueue} from '../../utils/rabbitmq-channel.utils';
 
 export class ClientService {
   constructor(
@@ -42,6 +43,7 @@ export class ClientService {
                   'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
                   [hostname, accountId, suppress, cabinet],
                 );
+                await publishToQueue('psl', Buffer.from(hostname));
                 goodSites.push({
                   numberOfString: lineNr,
                   origin: line,
@@ -107,6 +109,7 @@ export class ClientService {
               'INSERT INTO sites (fqdn, created_by, suppress, cabinet) VALUES ($1::text, $2::integer, $3::boolean, $4::boolean)',
               [hostname, accountId, suppress, cabinet],
             );
+            await publishToQueue('psl', Buffer.from(hostname));
             goodSites.push({
               numberOfString: lineNr,
               origin: domain,

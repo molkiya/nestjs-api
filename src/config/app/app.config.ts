@@ -14,6 +14,8 @@ export const MONGODB_USERNAME: string = process.env.MONGODB_USERNAME || 'user';
 export const MONGODB_PASSWORD: string = process.env.MONGODB_PASSWORD || 'password';
 export const MONGODB_DATABASE: string = process.env.MONGODB_DATABASE || 'tom';
 
+export const RABBITMQ_ADDRESS: string = process.env.RABBITMQ_ADDRESS || 'amqp://user:password@0.0.0.0:5672';
+
 export const DEV: boolean = process.env.DEV || JSON.parse('false');
 
 export const CLIENT_ID: string = process.env.CLIENT_ID;

@@ -23,4 +23,7 @@ export const pgInit = async () => {
   const accounts = fs.readFileSync('src/shared/ddl/accounts.ddl').toString();
   await pool.query(accounts);
   console.log(accounts);
+  const psl = fs.readFileSync('src/shared/ddl/psl.ddl').toString();
+  await pool.query(psl);
+  console.log(psl);
 };
