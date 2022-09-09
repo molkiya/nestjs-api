@@ -5,8 +5,8 @@ let channel;
 
 const connectToChannel = async () => {
   try {
-    let connection = await amqplib.connect(RABBITMQ_ADDRESS);
-    return connection.createChannel();
+    const connection = await amqplib.connect(RABBITMQ_ADDRESS);
+    return await connection.createChannel();
   } catch (e) {
     console.error('failed to create amqp channel: ', e);
   }
@@ -16,5 +16,5 @@ export async function publishToQueue(queue, data) {
   if (channel == null) {
     channel = await connectToChannel();
   }
-  return channel.sendToQueue(queue, Buffer.from(data));
+  return await channel.sendToQueue(queue, Buffer.from(data));
 }

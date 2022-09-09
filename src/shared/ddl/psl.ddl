@@ -14,23 +14,23 @@ CREATE TABLE IF NOT EXISTS psl
     is_priv BOOLEAN DEFAULT NULL
 );
 
-CREATE INDEX psl_err_index
+CREATE INDEX IF NOT EXISTS psl_err_index
     ON psl (err);
 
-CREATE INDEX psl_idna_index
+CREATE INDEX IF NOT EXISTS psl_idna_index
     ON psl (idna);
 
-CREATE INDEX psl_is_ip_index
+CREATE INDEX IF NOT EXISTS psl_is_ip_index
     ON psl (is_ip);
 
-CREATE INDEX psl_is_priv_index
+CREATE INDEX IF NOT EXISTS psl_is_priv_index
     ON psl (is_priv);
 
-CREATE INDEX psl_reg_dom_index
+CREATE INDEX IF NOT EXISTS psl_reg_dom_index
     ON psl (reg_dom);
 
-CREATE INDEX psl_sub_dom_index
+CREATE INDEX IF NOT EXISTS psl_sub_dom_index
     ON psl (sub_dom);
 
-CREATE INDEX psl_top_dom_index
+CREATE INDEX IF NOT EXISTS psl_top_dom_index
     ON psl (top_dom);
