@@ -93,6 +93,7 @@ export class ClientService {
     const badSites = [];
     const goodSites = [];
     let lineNr = 0;
+
     await Promise.all(
       domainList.map(async (domain) => {
         lineNr += 1;
