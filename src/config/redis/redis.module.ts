@@ -16,6 +16,8 @@ import {REDIS_HOST, REDIS_PASSWORD, REDIS_PORT} from '../app/app.config';
       provide: 'REDIS_CLIENT',
       useFactory: async (options: {url: string; password: string}) => {
         const client = createClient(options);
+        // url = redis://localhost:6379
+        // password = eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
         await client.connect();
         return client;
       },
